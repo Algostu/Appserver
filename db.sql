@@ -5,7 +5,7 @@ USE dodam;
 
 # 역활 생성
 -- Drop role commonUser;
--- CREATE ROLE commonUser; 
+-- CREATE ROLE commonUser;
 -- GRANT insert, delete, update, select ON dodam.* TO commonUser;
 
 # 일반 생성 유저 권한 부여
@@ -65,7 +65,7 @@ create table if not exists article (
     foreign key (userID)
     references user_info(userID) on delete no action,
     foreign key (communityID)
-    references community(communityID) on delete cascade	
+    references community(communityID) on delete cascade
 );
 
 insert into region_info(regionID, regionName) values (1, 'suwon');
@@ -161,7 +161,7 @@ values(2, 1, true, "많은 다 이웃 비둘기, 내 까닭입니다. 피어나�
 아름다운 시인의 동경과 당신은 나의 이름자를 파란 오는 보고, 봅니다. 다 별 못 북간도에 아침이 하나의 우는 하나에 계십니다. 위에 이제 소학교 하나에 봄이 된 이름과, 시인의 우는 봅니다. 그리고 강아지, 노새, 거외다.", 10, 2, 1);
 
 insert into article(communityID, userID, isAnonymous, title, content, viewNumber,reply, heart)
-values(2, 1, true, "밤이 이런 내린 잠, 계집애들의 언덕 청춘이 걱정도 봅니다. 새워 무성할 했던 버리었습니다.", "밤이 이런 내린 잠, 계집애들의 언덕 청춘이 걱정도 봅니다. 새워 무성할 했던 버리었습니다. 걱정도 너무나 하나에 나는 봅니다.
+values(2, 1, true, "밤이 이런 내린 잠, 계집애들의 언덕 청춘이 걱정도 봅니다.", "밤이 이런 내린 잠, 계집애들의 언덕 청춘이 걱정도 봅니다. 새워 무성할 했던 버리었습니다. 걱정도 너무나 하나에 나는 봅니다.
 
 이름자를 이름을 속의 듯합니다. 하나의 하나에 봄이 라이너 까닭입니다.", 10, 20, 10);
 
@@ -333,10 +333,3 @@ insert into article(communityID, userID, isAnonymous, title, content, viewNumber
 values(2, 3, true, "없으면 희망의 같이 석가는 현저하게 듣는다.", "없으면 희망의 같이 석가는 현저하게 듣는다. 방황하여도, 구하기 힘차게 보이는 가는 것이다.
 
 풍부하게 못할 하였으며, 사는가 두손을 청춘이 봄바람이다. 있을 아니더면, 길을 사막이다. 그들에게 황금시대를 능히 가치를 듣는다.", 10, 0, 10);
-
-
-
-
-
-
-

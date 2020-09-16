@@ -21,6 +21,7 @@ def create_app(config_name):
 
     # 설정 로드
     app.config.from_object(config_by_name[config_name])
+    app.config['JSON_AS_ASCII'] = False
     database = create_engine(app.config['DB_URL'], encoding = 'utf-8')
 
     app.db = database
@@ -149,7 +150,7 @@ def article(method):
                 "heart" : latest_article["heart"], "reply" : latest_article["reply"]}
 
 
-        return json.dumps(latest_article)
+        return json.dumps(latest_articles, ensure_ascii=False, indent=4)
 
 
 
