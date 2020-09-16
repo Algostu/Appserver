@@ -149,7 +149,7 @@ def article(method):
                 "heart" : latest_article["heart"], "reply" : latest_article["reply"]}
 
 
-        return json.dumps(latest_articles)
+        return json.dumps(latest_article)
 
 
 
