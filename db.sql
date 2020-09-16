@@ -4,16 +4,16 @@ CREATE DATABASE dodam;
 USE dodam;
 
 # 역활 생성
-Drop role commonUser;
-CREATE ROLE commonUser; 
-GRANT insert, delete, update, select ON dodam.* TO commonUser;
+-- Drop role commonUser;
+-- CREATE ROLE commonUser; 
+-- GRANT insert, delete, update, select ON dodam.* TO commonUser;
 
 # 일반 생성 유저 권한 부여
-#create user normalUser@localhost identified by '1234';
+-- #create user normalUser@localhost identified by '1234';
 
-GRANT commonUser TO 'normalUser'@'localhost';
-FLUSH PRIVILEGES;
-show grants for commonUser;
+-- GRANT commonUser TO 'normalUser'@'localhost';
+-- FLUSH PRIVILEGES;
+-- show grants for commonUser;
 
 # 테이블 생성
 
