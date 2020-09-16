@@ -18,6 +18,9 @@
 --
 -- Table structure for table `article`
 --
+Drop database dodam;
+CREATE DATABASE dodam;
+USE dodam;
 
 DROP TABLE IF EXISTS `article`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
