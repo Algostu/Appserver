@@ -56,6 +56,11 @@ def test():
 		return 0
 	return 1
 
+@app.route('/kakao-login', methods=['GET'])
+def kakao_login():
+    pass
+
+
 def on_json_loading_failed_return_dict(e):
     return {}
 
@@ -84,12 +89,12 @@ def article(method):
             return 'fail'
         now = time.localtime()
         article['time'] = "%04d/%02d/%02d %02d:%02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
-        app.db.execute(text(
+        result = app.db.execute(text(
         """
         INSERT INTO article (communityID, userID, isAnonymous, title, content)
         VALUES (:articleType, :userId, :isAnonymous, :title, :content)
         """), article)
-        return 'success'
+        return 'success:' + str(result.lastrowid)
     elif method == 'delete' and request.method == 'GET':
         userID = request.args.get('userID')
         articleID = request.args.get('articleID')
@@ -107,8 +112,7 @@ def article(method):
             sql = """
             select articleID, isAnonymous, content, title, viewNumber, reply, heart, writtenTime, nickName
             from article JOIN user_info ON article.userID = user_info.userID
-            where communityID=%s
-            order by writtenTime desc limit 25
+            where communityID=%s order by articleID desc limit 25
             """
             rows = app.db.execute(sql, (articleType)).fetchall()
         else:
