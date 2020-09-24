@@ -11,15 +11,17 @@ jobs:
       - python/load-cache
       - python/install-deps
       - python/save-cache
+      - run:
+          commend : |
+          pytest test_sample.py
+          pytest --cov=./ ./test 
+    post:
+      - codecov
 
 workflows:
   main:
     jobs:
       - build-and-test
+      - test
       
-test:
-  override:
-    - pytest test_sample.py
-    - pytest --cov=./ ./test
-  post:
-    - codecov
+
