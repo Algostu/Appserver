@@ -4,7 +4,6 @@ from sqlalchemy import text
 
 article_api = Blueprint('article', __name__, url_prefix='/article')
 
-
 @article_api.route('/read', methods=['GET'])
 def get_read_article():
     articleID = request.args.get('articleID')
@@ -17,8 +16,13 @@ def get_read_article():
     """, (articleID, articleType)).fetchone()
     article = {}
     if row:
-        article = {'articleID': row[0], 'isAnonymous': row[1], 'content':row[2], 'title':row[3],
-        'viewNumber':row[4], 'reply':row[5], 'heart':row[6], 'writtenTime':row[7], 'nickName':row[8]}
+        if row[1]:
+            nickName = 'Anonymous'
+        else:
+            nickName = row[8]
+
+        article = {'articleID': row[0], 'content':row[2], 'title':row[3],
+        'viewNumber':row[4], 'reply':row[5], 'heart':row[6], 'writtenTime':row[7], 'nickName':nickName}
     return json.dumps(article)
 
 
@@ -70,8 +74,16 @@ def get_article_list():
         order by writtenTime desc limit 25
         """
         rows = app.db.execute(sql, (articleType, articleTime)).fetchall()
-    articles = [{'articleId': row[0], 'isAnonymous': row[1], 'content':row[2][:25], 'title':row[3][:20],
-    'viewNumber':row[4], 'reply':row[5], 'heart':row[6], 'writtenTime':row[7], 'nickName':row[8]} for row in rows]
+    articles = [ ]
+    for row in rows:
+        if row[1]:
+            nickName = 'Anonymous'
+        else:
+            nickName = row[8]
+            
+        articles.append({'articleId': row[0], 'content':row[2][:25], 'title':row[3][:20],
+        'viewNumber':row[4], 'reply':row[5], 'heart':row[6], 'writtenTime':row[7], 'nickName':nickName})
+
     return json.dumps(articles)
 
 
