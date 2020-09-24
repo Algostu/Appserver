@@ -13,8 +13,8 @@ jobs:
       - python/save-cache
       - run:
           commend : |
-          pytest test_sample.py
-          pytest --cov=./ ./test 
+            pytest test_sample.py
+            pytest --cov=./ ./test 
     post:
       - codecov
 
