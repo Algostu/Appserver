@@ -2,6 +2,7 @@ import os
 import pytest
 import json
 import tempfile
+import requests
 
 article_id = 0
 
@@ -22,25 +23,29 @@ class TestArticle:
         "test_get_article_list": [dict(params="articleType=2&articleTime=latest")]
     }
 
-    def test_read_article(self, setup, params, ev):
-        response = setup.get('/article/read', query_string=params)
-        rv = json.loads(response.data.decode("utf-8"))
+    def test_read_article(self, params, ev):
+        URL = 'http://49.50.164.11:5000/article/read'
+        response = requests.get(URL, params=params)
+        rv = response.json()
         assert rv['articleID'] == ev['articleID']
 
-    def test_write_article(self, setup, body):
-        response = setup.post('/article/write', json=json.dumps(body))
-        rv = response.data.decode("utf-8")
+    def test_write_article(self, body):
+        URL = 'http://49.50.164.11:5000/article/write'
+        response = requests.get(URL, json=body)
+        rv = response.text.decode("utf-8")
         article_id = rv.split(':')[1]
         assert 'success' in rv
 
-    def test_delete_article(self, setup, params):
-        response = setup.get('/article/delete', query_string=params.format(article_id))
-        rv = response.data.decode("utf-8")
+    def test_delete_article(self, params):
+        URL = 'http://49.50.164.11:5000/article/delete'
+        response = requests.get(URL, params=params.format(article_id))
+        rv = response.text.decode("utf-8")
         assert 'success' in rv
 
-    def test_get_article_list(self, setup, params):
-        response = setup.get('/article/articleList', query_string=params)
-        rv = json.loads(response.data.decode("utf-8"))
+    def test_get_article_list(self, params):
+        URL = 'http://49.50.164.11:5000/article/articleList'
+        response = requests.get(URL, params=params)
+        rv = response.json()
         assert len(rv) > 0
 
     # def test_messages(self):
