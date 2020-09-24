@@ -31,7 +31,7 @@ class TestArticle:
 
     def test_write_article(self, body):
         URL = 'http://49.50.164.11:5000/article/write'
-        response = requests.get(URL, json=body)
+        response = requests.post(URL, json=body)
         rv = response.text
         article_id = rv.split(':')[1]
         assert 'success' in rv
