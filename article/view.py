@@ -24,7 +24,7 @@ def get_read_article():
 
 @article_api.route('/write', methods=['POST'])
 def post_write_article():
-    article = json.loads(request.json)
+    article = request.json
     if article is None:
         return 'fail'
     now = time.localtime()
