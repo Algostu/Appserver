@@ -1,4 +1,4 @@
 import sys
 sys.path.insert(0,"/var/www/Appserver/flaskr")
 
-from manage import app as application
+from Appserver.manager import app as application
