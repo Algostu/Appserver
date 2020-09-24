@@ -32,14 +32,14 @@ class TestArticle:
     def test_write_article(self, body):
         URL = 'http://49.50.164.11:5000/article/write'
         response = requests.get(URL, json=body)
-        rv = response.text.decode("utf-8")
+        rv = response.text
         article_id = rv.split(':')[1]
         assert 'success' in rv
 
     def test_delete_article(self, params):
         URL = 'http://49.50.164.11:5000/article/delete'
         response = requests.get(URL, params=params.format(article_id))
-        rv = response.text.decode("utf-8")
+        rv = response.text
         assert 'success' in rv
 
     def test_get_article_list(self, params):
