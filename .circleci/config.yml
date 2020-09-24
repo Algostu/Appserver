@@ -11,9 +11,6 @@ jobs:
       - python/load-cache
       - python/install-deps
       - python/save-cache
-      - run:
-          command: pytest
-          name: Test
 
 workflows:
   main:
@@ -22,6 +19,7 @@ workflows:
       
 test:
   override:
+    - pytest test_sample.py
     - pytest --cov=./ ./test
   post:
     - codecov
