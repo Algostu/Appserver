@@ -2,26 +2,13 @@ version: 2.1
 
 orbs:
   python: circleci/python@0.2.1
+  
+test:
+    override:
+        - pytest
 
-jobs:
-  build-and-test:
-    executor: python/default
-    steps:
-      - checkout
-      - python/load-cache
-      - python/install-deps
-      - python/save-cache
-      - run:
-          commend : |
-            pytest test_sample.py
-            pytest --cov=./ ./test 
-    post:
-      - codecov
-
-workflows:
-  main:
-    jobs:
-      - build-and-test
-      - test
+dependencies:
+    pre:
+       -  pip install -r requirements.txt
       
 
