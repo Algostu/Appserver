@@ -1,7 +1,9 @@
-import sys
+import sys, os
 import pytest
 
-sys.path.insert(0, '/var/www/Appserver/')
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
+
 from main import create_app
 
 
