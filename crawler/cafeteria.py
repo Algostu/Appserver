@@ -60,7 +60,7 @@ class cafeteriaCrawler(crawler):
                 region_school[school['name']] = menus
 
             cafe_menu_per_school[region] = region_school
-        
+
         self.save_json('cafeteria_menu_per_school', cafe_menu_per_school)
         self.save_json('school_list', school_list)
 
