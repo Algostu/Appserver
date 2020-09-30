@@ -4,7 +4,8 @@ import os, sys, json, unittest, time
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager, Command, Server
 
-from main import create_app, db
+from main import create_app
+from main.model import db
 
 app = create_app('dev')
 app.app_context().push()

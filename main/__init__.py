@@ -3,8 +3,6 @@ import os
 
 # external package
 from flask import Flask
-from flask_bcrypt import Bcrypt
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, text
 
 ## __init__ files:
@@ -12,8 +10,7 @@ from sqlalchemy import create_engine, text
 ## 2. create_app 함수와 같은 클래스, 함수 같은 것들 만들어 놓기
 ## 3. 임포트 제한 (X)
 
-db = SQLAlchemy()
-flask_bcrypt = Bcrypt()
+
 
 def create_app(config_name):
     """flask application factory
@@ -23,6 +20,8 @@ def create_app(config_name):
     # import configuration file
     from . import config
     from .view import api_urls
+    from .model import db
+    from .extensions import flask_bcrypt, login_manager
 
     # create and configure the app
     app = Flask(__name__, instance_relative_config = True)
