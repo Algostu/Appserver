@@ -26,17 +26,25 @@ def get_read_article():
     return json.dumps(article)
 
 
+def on_json_loading_failed_return_dict(e):
+    return {}
+
 @article_api.route('/write', methods=['POST'])
 def post_write_article():
+    request.on_json_loading_failed = on_json_loading_failed_return_dict
     article = request.json
+    if type(article) == type(''):
+        article = json.loads(article)
+
     if article is None:
         return 'fail'
+
     now = time.localtime()
     article['time'] = "%04d/%02d/%02d %02d:%02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
     result = app.db.execute(text(
     """
-    INSERT INTO article (communityID, userID, isAnonymous, title, content)
-    VALUES (:articleType, :userId, :isAnonymous, :title, :content)
+    INSERT INTO article (communityID, userID, isAnonymous, title, content, writtenTime)
+    VALUES (:articleType, :userId, :isAnonymous, :title, :content, :time)
     """), article)
     return 'success:' + str(result.lastrowid)
 
@@ -80,7 +88,7 @@ def get_article_list():
             nickName = 'Anonymous'
         else:
             nickName = row[8]
-            
+
         articles.append({'articleId': row[0], 'content':row[2][:25], 'title':row[3][:20],
         'viewNumber':row[4], 'reply':row[5], 'heart':row[6], 'writtenTime':row[7], 'nickName':nickName})
 
@@ -94,13 +102,14 @@ def get_hot_article_list():
     FROM article WHERE heart =
     (SELECT max(heart) FROM article where communityID = %s)
     """
-    hot_articles = {}
+    hot_articles = []
     for id, name in app.db.execute("select * from community").fetchall():
         hot_article = app.db.execute(sql, id).fetchone()
         if hot_article:
-            hot_articles[name] = {"articleID" : hot_article["articleID"], "communityID" : hot_article["communityID"],
+            hot_articles.append({"articleID" : hot_article["articleID"], "communityID" : hot_article["communityID"],
             "title" : hot_article["title"][:20], "content" : hot_article["content"][:50],
-            "heart" : hot_article["heart"], "reply" : hot_article["reply"]}
+            "heart" : hot_article["heart"], "reply" : hot_article["reply"]})
+            hot_article = None
     return json.dumps(hot_articles, ensure_ascii=False, indent=4)
 
 
@@ -110,11 +119,11 @@ def get_latest_article_list():
     SELECT articleID, communityID, title, content, heart, reply
     FROM article where communityID = %s order by writtenTime desc limit 1
     """
-    latest_articles = {}
+    latest_articles = []
     for id, name in app.db.execute("select * from community").fetchall():
         latest_article = app.db.execute(sql, id).fetchone()
         if latest_article:
-            latest_articles[name] = {"articleID" : latest_article["articleID"], "communityID" : latest_article["communityID"],
+            latest_articles.append({"articleID" : latest_article["articleID"], "communityID" : latest_article["communityID"],
             "title" : latest_article["title"][:20], "content" : latest_article["content"][:50],
-            "heart" : latest_article["heart"], "reply" : latest_article["reply"]}
+            "heart" : latest_article["heart"], "reply" : latest_article["reply"]})
     return json.dumps(latest_articles, ensure_ascii=False, indent=4)
