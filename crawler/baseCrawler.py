@@ -15,3 +15,9 @@ class crawler:
     def save_json(self, file_name, json_data):
         with open("data/"+file_name+'.json', "w", encoding = 'utf8') as json_file:
             json.dump(json_data, json_file, indent=4, ensure_ascii=False)
+
+    def read_json(self, file_name):
+        json_data = {}
+        with open(file_name, encoding = 'utf8') as json_file:
+            json_data = json.load(json_file)
+        return json_data

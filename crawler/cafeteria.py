@@ -1,11 +1,13 @@
 import requests
 import json
 import time
+import re
 from tqdm import tqdm
 from baseCrawler import crawler
 
 class cafeteriaCrawler(crawler):
     def __init__(self):
+        self.pattern = re.compile('\\(.?\\){1}|(([0-9]*?)\\.)*?')
         super().__init__('https://www.foodsafetykorea.go.kr/')
 
     def get_list(self):
@@ -34,10 +36,21 @@ class cafeteriaCrawler(crawler):
                 'date' : raw_menu['dd_date'],
                 'week' : raw_menu['week_dvs'],
                 'week_day' : raw_menu['week_day'],
-                'lunch' : raw_menu['lunch'],
+                'lunch' : parse_lunch(raw_menu['lunch']),
             })
 
         return menus
+
+    def parse_lunch(self, lunch):
+        return ",".join([self.pattern.sub('', x).strip('*') for x in lunch.split('\n')])
+
+    def process_json(self):
+        json_data = self.read_json('data/cafeteria_menu_per_school.json')
+        for region, schools in json_data.items():
+            for days in schools.values():
+                for day in days:
+                    day['lunch'] = self.parse_lunch(day['lunch'])
+        self.save_json('processed_cafeteria_menu_per_school', json_data)
 
     def get_json(self):
         url = 'portal/sensuousmenu/selectSchoolMonthMealsDetail.do'
@@ -60,9 +73,10 @@ class cafeteriaCrawler(crawler):
                 region_school[school['name']] = menus
 
             cafe_menu_per_school[region] = region_school
-        
+
         self.save_json('cafeteria_menu_per_school', cafe_menu_per_school)
         self.save_json('school_list', school_list)
+
 
 
 
