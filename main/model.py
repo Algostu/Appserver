@@ -46,10 +46,20 @@ class SchoolInfo(db.Model):
 
     schoolID = db.Column(db.Integer, primary_key=True)
     regionID = db.Column(db.ForeignKey('region_info.regionID', ondelete='CASCADE'), index=True)
-    schoolName = db.Column(db.String(20, 'utf8_unicode_ci'))
+    schoolName = db.Column(db.String(1000, 'utf8_unicode_ci'))
+    gender = db.Column(db.Integer)
+    contact = db.Column(db.String(20, 'utf8_unicode_ci'))
+    homePage = db.Column(db.String(1000, 'utf8_unicode_ci'))
 
     region_info = db.relationship('RegionInfo', primaryjoin='SchoolInfo.regionID == RegionInfo.regionID', backref='school_infos')
 
+
+class CafeteriaInfo(db.Model):
+    __tablename__ = 'cafeteria_info'
+
+    schoolID = db.Column(db.Integer, primary_key=True)
+    regionID = db.Column(db.ForeignKey('region_info.regionID', ondelete='CASCADE'), index=True)
+    cafeMenu = db.Column(db.String(7000, 'utf8_unicode_ci'))
 
 
 class UserCredential(db.Model):
