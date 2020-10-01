@@ -1,10 +1,18 @@
 # coding: utf-8
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.inspection import inspect
 
 
 db = SQLAlchemy()
 
+class Serializer(object):
 
+    def serialize(self):
+        return {c: getattr(self, c) for c in inspect(self).attrs.keys()}
+
+    @staticmethod
+    def serialize_list(l):
+        return [m.serialize() for m in l]
 
 class Article(db.Model):
     __tablename__ = 'article'
@@ -46,6 +54,8 @@ class SchoolInfo(db.Model):
 
     schoolID = db.Column(db.Integer, primary_key=True)
     regionID = db.Column(db.ForeignKey('region_info.regionID', ondelete='CASCADE'), index=True)
+    regionName = db.Column(db.String(100, 'utf8_unicode_ci'))
+    townName = db.Column(db.String(100, 'utf8_unicode_ci'))
     schoolName = db.Column(db.String(1000, 'utf8_unicode_ci'))
     gender = db.Column(db.Integer)
     contact = db.Column(db.String(20, 'utf8_unicode_ci'))
@@ -70,14 +80,23 @@ class UserCredential(db.Model):
 
 
 
-class UserInfo(db.Model):
+class UserInfo(db.Model, Serializer):
     __tablename__ = 'user_info'
 
-    userID = db.Column(db.Integer, primary_key=True)
+    userID = db.Column(db.BigInteger, primary_key=True)
     schoolID = db.Column(db.ForeignKey('school_info.schoolID', ondelete='CASCADE'), nullable=False, index=True)
-    grade = db.Column(db.Integer, nullable=False)
+    regionID = db.Column(db.ForeignKey('region_info.regionID', ondelete='CASCADE'), index=True)
+    email = db.Column(db.String(100, 'utf8_unicode_ci'), nullable=False)
     age = db.Column(db.Integer, nullable=False)
-    userName = db.Column(db.String(20, 'utf8_unicode_ci'), nullable=False)
+    gender = db.Column(db.Integer, nullable=False)
+    grade = db.Column(db.Integer, nullable=False)
     nickName = db.Column(db.String(20, 'utf8_unicode_ci'), nullable=False)
 
     school_info = db.relationship('SchoolInfo', primaryjoin='UserInfo.schoolID == SchoolInfo.schoolID', backref='user_infos')
+    region_info = db.relationship('RegionInfo', primaryjoin='UserInfo.regionID == RegionInfo.regionID', backref='user_infos')
+
+    def serialize(self):
+        d = Serializer.serialize(self)
+        del d['school_info']
+        del d['region_info']
+        return d

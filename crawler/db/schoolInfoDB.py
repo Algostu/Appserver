@@ -32,8 +32,8 @@ class schoolDB(baseDB):
                 if SchoolInfo.query.filter_by(schoolID = id).first():
                     continue
                 school = SchoolInfo(schoolID=id, regionID=regionID,
-                schoolName=sch['name'], gender=gender,
-                contact=sch['contact'], homePage=sch['homePage'])
+                regionName = sch['region'], townName = sch['subRegion'], schoolName=sch['name'],
+                gender=gender, contact=sch['contact'], homePage=sch['homePage'])
                 db.session.add(school)
             db.session.commit()
 
