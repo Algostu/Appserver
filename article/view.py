@@ -22,7 +22,7 @@ def get_read_article():
             nickName = row[8]
 
         article = {'articleID': row[0], 'content':row[2], 'title':row[3],
-        'viewNumber':row[4], 'reply':row[5], 'heart':row[6], 'writtenTime':row[7], 'nickName':nickName}
+        'viewNumber':row[4], 'reply':row[5], 'heart':row[6], 'writtenTime':str(row[7]), 'nickName':nickName}
     return json.dumps(article)
 
 

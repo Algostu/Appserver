@@ -32,13 +32,15 @@ def get_login():
         return '<Fail>:1:token expired'
     result = UserInfo.query.filter_by(userID = int(uid)).first()
     if not result:
-        return 'fail'
+        return json.dumps({'status' : 'fail'})
     # Todo: 다른 추가 정보 저장하기
     # 복호화 하는 방법
     # bcrypt.check_password_hash(pw_hash, 'hunter2').decode('utf-8')
     # user_session['user_hash'] = flask_bcrypt.generate_password_hash(uid)
     # session['token'] = user_session['user_hash']
-    return json.dumps(result.serialize())
+    result = result.serialize()
+    result['status'] = 'success'
+    return json.dumps(result)
 
 @login_api.route('/kakaoSignup', methods=['POST'])
 def post_signup():
