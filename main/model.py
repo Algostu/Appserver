@@ -31,8 +31,6 @@ class Article(db.Model):
     community = db.relationship('Community', primaryjoin='Article.communityID == Community.communityID', backref='articles')
     user_info = db.relationship('UserInfo', primaryjoin='Article.userID == UserInfo.userID', backref='articles')
 
-
-
 class Community(db.Model):
     __tablename__ = 'community'
 
@@ -83,7 +81,7 @@ class UserCredential(db.Model):
 class UserInfo(db.Model, Serializer):
     __tablename__ = 'user_info'
 
-    userID = db.Column(db.BigInteger, primary_key=True)
+    userID = db.Column(db.Integer, primary_key=True)
     schoolID = db.Column(db.ForeignKey('school_info.schoolID', ondelete='CASCADE'), nullable=False, index=True)
     regionID = db.Column(db.ForeignKey('region_info.regionID', ondelete='CASCADE'), index=True)
     email = db.Column(db.String(100, 'utf8_unicode_ci'), nullable=False)
@@ -99,4 +97,54 @@ class UserInfo(db.Model, Serializer):
         d = Serializer.serialize(self)
         del d['school_info']
         del d['region_info']
+        return d
+
+
+class Reply(db.Model):
+    __tablename__ = 'reply'
+
+    replyID = db.Column(db.Integer, primary_key=True)
+    articleID = db.Column(db.ForeignKey('article.articleID', ondelete='CASCADE'), index=True)
+    communityID = db.Column(db.ForeignKey('community.communityID', ondelete='CASCADE'), index=True)
+    userID = db.Column(db.ForeignKey('user_info.userID', ondelete='CASCADE'), index=True)
+    nickName = db.Column(db.String(20, 'utf8_unicode_ci'))
+    content = db.Column(db.String(5000, 'utf8_unicode_ci'))
+    writtenTime = db.Column(db.DateTime)
+
+    article = db.relationship('Article', primaryjoin='Reply.articleID == Article.articleID', backref='replys')
+    community = db.relationship('Community', primaryjoin='Reply.communityID == Community.communityID', backref='replys')
+    user_info = db.relationship('UserInfo', primaryjoin='Reply.userID == UserInfo.userID', backref='replys')
+
+    def serialize(self):
+        d = Serializer.serialize(self)
+        del d['article']
+        del d['community']
+        del d['user_info']
+        d['writtenTime'] = str(d['writtenTime'])
+        return d
+
+class ReReply(db.Model):
+    __tablename__ = 'rereply'
+
+    reReplyID = db.Column(db.Integer, primary_key=True)
+    parentReplyID = db.Column(db.ForeignKey('reply.replyID', ondelete='CASCADE'), index=True)
+    articleID = db.Column(db.ForeignKey('article.articleID', ondelete='CASCADE'), index=True)
+    communityID = db.Column(db.ForeignKey('community.communityID', ondelete='CASCADE'), index=True)
+    userID = db.Column(db.ForeignKey('user_info.userID'), index=True)
+    nickName = db.Column(db.String(20, 'utf8_unicode_ci'))
+    content = db.Column(db.String(5000, 'utf8_unicode_ci'))
+    writtenTime = db.Column(db.DateTime)
+
+    article = db.relationship('Article', primaryjoin='ReReply.articleID == Article.articleID', backref='rereplies')
+    community = db.relationship('Community', primaryjoin='ReReply.communityID == Community.communityID', backref='rereplies')
+    user_info = db.relationship('UserInfo', primaryjoin='ReReply.userID == UserInfo.userID', backref='rereplies')
+    reply = db.relationship('Reply', primaryjoin='ReReply.parentReplyID == Reply.replyID', backref='rereplies')
+
+    def serialize(self):
+        d = Serializer.serialize(self)
+        del d['article']
+        del d['community']
+        del d['user_info']
+        del d['reply']
+        d['writtenTime'] = str(d['writtenTime'])
         return d
