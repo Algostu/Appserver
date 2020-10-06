@@ -11,6 +11,7 @@ from flask_script import Command, Manager, Option
 
 from schoolInfoDB import schoolDB
 from cafeteriaDB import cafeDB
+from communityDB import communityDB
 
 class dbAdapter(Command):
     option_list = (
@@ -24,3 +25,6 @@ class dbAdapter(Command):
         elif type=='cafeInfo' or type=='C':
             cafe = cafeDB()
             cafe.run()
+        elif type=='initialCommunity' or type=='I':
+            community = communityDB()
+            community.run()
