@@ -60,3 +60,7 @@ $ python manage.py db --help (history를 볼 수 있는 방법같을 것을 알�
 6. ORM 방식으로 DB 접근하는 방법
 
 flask-sqlalchemy의 [공식문서](https://flask-sqlalchemy.palletsprojects.com/en/2.x/)를 보는 것이 도움이 된다.
+
+7. server_defalut = FetchedValue() 에러 해결방법
+
+migration에 `from sqlalchemy.schema import FetchedValue`를 추가해준다. 이걸 왜 import안해주는지는 잘 모르겠지만...
