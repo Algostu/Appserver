@@ -12,10 +12,19 @@ com_type = [ArticleAll, ArticleRegion, ArticleSchool]
 @login_required
 @allowed_access
 def get_read_article():
-    communityType = request.args.get('communityType')
-    articleID = request.args.get('articleID')
+    communityType = int(request.args.get('communityType'))
+    articleID = int(request.args.get('articleID'))
     article = com_type[communityType]
-    return json.dumps(convert_to_dict(article.query.filter_by(articleID=articleID)))
+    # query db and change to dict
+    query_result = article.query.filter_by(articleID=articleID).first()
+    if not query_result:
+        return json.dumps({'status':'fail'})
+    target_article = convert_to_dict(query_result)
+    target_article.pop('userID')
+    #  increase view number
+    query_result.viewNumber += 1
+    db.session.commit()
+    return json.dumps(target_article)
 
 # For future use
 # request.on_json_loading_failed = on_json_loading_failed_return_dict
@@ -34,7 +43,7 @@ def post_write_article():
     written_time = "%04d/%02d/%02d %02d:%02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
     nickname = '익명' if written_info['isAnonymous'] else session['nick_name']
     # generate articleID
-    article_id = (written_info['communityID'] % 100) * 100000000 + get_random_numeric_value(2) * 1000000 + current_milli_time()
+    article_id = (written_info['communityID'] % 100) * 10000000 + get_random_numeric_value(2) * 100000 + current_milli_time()
     # create article instante
     article = com_type[written_info['communityType']]
     new_article = article(articleID=article_id,
@@ -43,7 +52,7 @@ def post_write_article():
     nickName=nickname,
     title=written_info['title'],
     content=written_info['content'],
-    writtenTime=written_time)
+    writtenTime=written_time, heart = 0, viewNumber = 0, reply = 0)
     db.session.add(new_article)
     db.session.commit()
     return 'success'

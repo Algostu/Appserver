@@ -45,11 +45,10 @@ def login_required(f):
 def allowed_access(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        ids = session.get('allowed_ids')
         json_data = request.json
-        print(json_data)
-        print(ids)
-        if json_data['communityID'] not in ids:
+        id = int(json_data['communityID']) if json_data else int(request.args.get('communityID'))
+        ids = session.get('allowed_ids')
+        if id not in ids:
             return "access denied"
         return f(*args, **kwargs)
     return decorated_function
@@ -57,4 +56,7 @@ def allowed_access(f):
 def convert_to_dict(query_result):
     dict_result = dict(query_result.__dict__)
     dict_result.pop('_sa_instance_state', None)
+    written_time = dict_result.pop('writtenTime', None)
+    if written_time:
+        dict_result['writtenTime'] = str(written_time)
     return dict_result
