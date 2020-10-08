@@ -1,13 +1,15 @@
+ #-*- coding: utf-8 -*-
 import requests
 import json
 import time
 import re
+import os
 from tqdm import tqdm
 from baseCrawler import crawler
 
 class cafeteriaCrawler(crawler):
     def __init__(self):
-        self.pattern = re.compile('\\(.?\\){1}|(([0-9]*?)\\.)*?')
+        self.pattern = re.compile('\\(.?\\){1}|(([0-9]*?)\\.)*')
         super().__init__('https://www.foodsafetykorea.go.kr/')
 
     def get_list(self):
@@ -33,10 +35,10 @@ class cafeteriaCrawler(crawler):
                 continue
 
             menus.append({
-                'date' : raw_menu['dd_date'],
-                'week' : raw_menu['week_dvs'],
-                'week_day' : raw_menu['week_day'],
-                'lunch' : parse_lunch(raw_menu['lunch']),
+                'date' : raw_menu['dd_date'].strip(),
+                'week' : raw_menu['week_dvs'].strip(),
+                'week_day' : raw_menu['week_day'].strip(),
+                'lunch' : self.parse_lunch(raw_menu['lunch']),
             })
 
         return menus
@@ -55,30 +57,26 @@ class cafeteriaCrawler(crawler):
     def get_json(self):
         url = 'portal/sensuousmenu/selectSchoolMonthMealsDetail.do'
         school_list = self.get_list()
-
+        now = time.localtime()
+        post_data = {
+            'schl_cd' : "",
+            'type_cd' : 'M',
+            'year' : now.tm_year,
+            'month' : now.tm_mon,
+        }
         cafe_menu_per_school = {}
-
         for region, schools in tqdm(school_list.items()):
             region_school = {}
             for school in tqdm(schools):
                 time.sleep(0.01)
-                post_data = {
-                    'schl_cd' : school['id'],
-                    'type_cd' : 'M',
-                    'year' : '2020',
-                    'month' : '9',
-                }
-
+                post_data['schl_cd']=school['id']
                 menus = self.parse_menu(self.post_url(url, post_data))
                 region_school[school['name']] = menus
 
             cafe_menu_per_school[region] = region_school
 
-        self.save_json('cafeteria_menu_per_school', cafe_menu_per_school)
+        self.save_json(str(now.tm_year)+'-'+str(now.tm_mon)+'-'+'cafeteria_menu_per_school', cafe_menu_per_school)
         self.save_json('school_list', school_list)
-
-
-
 
 
 if __name__ == '__main__':
