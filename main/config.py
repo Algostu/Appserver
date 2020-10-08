@@ -1,4 +1,5 @@
 import os
+import redis
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -13,6 +14,9 @@ class Config:
     'database' : 'dodam'
     }
     SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://" + db['user'] + ":" + db['password'] + "@" + db['host'] + ":" + db['port'] + '/' + db['database'] + "?charset=utf8"
+    SESSION_COOKIE_NAME = 'session_id'
+    SESSION_TYPE = 'redis'
+    SESSION_REDIS = redis.from_url('redis://:1234@localhost:6379')
 
 class DevelopmentConfig(Config):
 	# uncomment the line below to use postgres

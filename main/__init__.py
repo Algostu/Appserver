@@ -21,7 +21,7 @@ def create_app(config_name):
     from . import config
     from .view import api_urls
     from .model import db
-    from .extensions import flask_bcrypt, login_manager
+    from .extensions import flask_bcrypt, login_manager, sess
 
     # create and configure the app
     app = Flask(__name__, instance_relative_config = True)
@@ -34,6 +34,9 @@ def create_app(config_name):
     # apply db
     db.init_app(app)
     app.db = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+
+    # apply redis session interface
+    sess.init_app(app)
 
     # apply crypto method
     flask_bcrypt.init_app(app)

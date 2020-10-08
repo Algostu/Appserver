@@ -45,7 +45,7 @@ class ArticleAll(db.Model):
     articleID = db.Column(db.Integer, primary_key=True)
     communityID = db.Column(db.ForeignKey('community_all.communityID', ondelete='CASCADE'), index=True)
     userID = db.Column(db.ForeignKey('user_info.userID'), index=True)
-    isAnonymous = db.Column(db.Integer)
+    nickName = db.Column(db.String(20, 'utf8_unicode_ci'), nullable=False)
     title = db.Column(db.String(50, 'utf8_unicode_ci'))
     content = db.Column(db.String(5000, 'utf8_unicode_ci'))
     viewNumber = db.Column(db.Integer, server_default=FetchedValue())
@@ -56,6 +56,7 @@ class ArticleAll(db.Model):
     community = db.relationship('CommunityAll', primaryjoin='ArticleAll.communityID == CommunityAll.communityID', backref='article_alls')
     user_info = db.relationship('UserInfo', primaryjoin='ArticleAll.userID == UserInfo.userID', backref='article_alls')
 
+
 class ArticleRegion(db.Model):
     __tablename__ = 'article_region'
 
@@ -63,7 +64,7 @@ class ArticleRegion(db.Model):
     communityID = db.Column(db.ForeignKey('community_region.communityID', ondelete='CASCADE'), index=True)
     regionID = db.Column(db.ForeignKey('region_info.regionID', ondelete='CASCADE'), index=True)
     userID = db.Column(db.ForeignKey('user_info.userID'), index=True)
-    isAnonymous = db.Column(db.Integer)
+    nickName = db.Column(db.String(20, 'utf8_unicode_ci'), nullable=False)
     title = db.Column(db.String(50, 'utf8_unicode_ci'))
     content = db.Column(db.String(5000, 'utf8_unicode_ci'))
     viewNumber = db.Column(db.Integer, server_default=FetchedValue())
@@ -75,6 +76,7 @@ class ArticleRegion(db.Model):
     user_info = db.relationship('UserInfo', primaryjoin='ArticleRegion.userID == UserInfo.userID', backref='article_regions')
     region_info = db.relationship('RegionInfo', primaryjoin='ArticleRegion.regionID == RegionInfo.regionID', backref='article_regions')
 
+
 class ArticleSchool(db.Model):
     __tablename__ = 'article_school'
 
@@ -82,7 +84,7 @@ class ArticleSchool(db.Model):
     communityID = db.Column(db.ForeignKey('community_school.communityID', ondelete='CASCADE'), index=True)
     schoolID = db.Column(db.ForeignKey('school_info.schoolID', ondelete='CASCADE'), nullable=False, index=True)
     userID = db.Column(db.ForeignKey('user_info.userID'), index=True)
-    isAnonymous = db.Column(db.Integer)
+    nickName = db.Column(db.String(20, 'utf8_unicode_ci'), nullable=False)
     title = db.Column(db.String(50, 'utf8_unicode_ci'))
     content = db.Column(db.String(5000, 'utf8_unicode_ci'))
     viewNumber = db.Column(db.Integer, server_default=FetchedValue())
@@ -99,6 +101,7 @@ class RegionInfo(db.Model):
 
     regionID = db.Column(db.Integer, primary_key=True)
     regionName = db.Column(db.String(20, 'utf8_unicode_ci'))
+
 
 class SchoolInfo(db.Model):
     __tablename__ = 'school_info'
@@ -131,7 +134,7 @@ class UserCredential(db.Model):
 
 
 
-class UserInfo(db.Model, Serializer):
+class UserInfo(db.Model):
     __tablename__ = 'user_info'
 
     userID = db.Column(db.Integer, primary_key=True)
@@ -145,12 +148,6 @@ class UserInfo(db.Model, Serializer):
 
     school_info = db.relationship('SchoolInfo', primaryjoin='UserInfo.schoolID == SchoolInfo.schoolID', backref='user_infos')
     region_info = db.relationship('RegionInfo', primaryjoin='UserInfo.regionID == RegionInfo.regionID', backref='user_infos')
-
-    def serialize(self):
-        d = Serializer.serialize(self)
-        del d['school_info']
-        del d['region_info']
-        return d
 
 
 class ReplyAll(db.Model):
@@ -168,14 +165,6 @@ class ReplyAll(db.Model):
     community = db.relationship('CommunityAll', primaryjoin='ReplyAll.communityID == CommunityAll.communityID', backref='reply_alls')
     user_info = db.relationship('UserInfo', primaryjoin='ReplyAll.userID == UserInfo.userID', backref='reply_alls')
 
-    def serialize(self):
-        d = Serializer.serialize(self)
-        del d['article']
-        del d['community']
-        del d['user_info']
-        d['writtenTime'] = str(d['writtenTime'])
-        return d
-
 class ReplyRegion(db.Model):
     __tablename__ = 'reply_region'
 
@@ -191,13 +180,6 @@ class ReplyRegion(db.Model):
     community = db.relationship('CommunityRegion', primaryjoin='ReplyRegion.communityID == CommunityRegion.communityID', backref='reply_regions')
     user_info = db.relationship('UserInfo', primaryjoin='ReplyRegion.userID == UserInfo.userID', backref='reply_regions')
 
-    def serialize(self):
-        d = Serializer.serialize(self)
-        del d['article']
-        del d['community']
-        del d['user_info']
-        d['writtenTime'] = str(d['writtenTime'])
-        return d
 
 class ReplySchool(db.Model):
     __tablename__ = 'reply_school'
@@ -214,13 +196,6 @@ class ReplySchool(db.Model):
     community = db.relationship('CommunitySchool', primaryjoin='ReplySchool.communityID == CommunitySchool.communityID', backref='reply_schools')
     user_info = db.relationship('UserInfo', primaryjoin='ReplySchool.userID == UserInfo.userID', backref='reply_schools')
 
-    def serialize(self):
-        d = Serializer.serialize(self)
-        del d['article']
-        del d['community']
-        del d['user_info']
-        d['writtenTime'] = str(d['writtenTime'])
-        return d
 
 class ReReplySchool(db.Model):
     __tablename__ = 'rereply_school'
@@ -239,14 +214,6 @@ class ReReplySchool(db.Model):
     user_info = db.relationship('UserInfo', primaryjoin='ReReplySchool.userID == UserInfo.userID', backref='rereplie_schools')
     reply = db.relationship('ReplySchool', primaryjoin='ReReplySchool.parentReplyID == ReplySchool.replyID', backref='rereplie_schools')
 
-    def serialize(self):
-        d = Serializer.serialize(self)
-        del d['article']
-        del d['community']
-        del d['user_info']
-        del d['reply']
-        d['writtenTime'] = str(d['writtenTime'])
-        return d
 
 class ReReplyRegion(db.Model):
     __tablename__ = 'rereply_region'
@@ -265,15 +232,6 @@ class ReReplyRegion(db.Model):
     user_info = db.relationship('UserInfo', primaryjoin='ReReplyRegion.userID == UserInfo.userID', backref='rereplie_regions')
     reply = db.relationship('ReplyRegion', primaryjoin='ReReplyRegion.parentReplyID == ReplyRegion.replyID', backref='rereplie_regions')
 
-    def serialize(self):
-        d = Serializer.serialize(self)
-        del d['article']
-        del d['community']
-        del d['user_info']
-        del d['reply']
-        d['writtenTime'] = str(d['writtenTime'])
-        return d
-
 class ReReplyAll(db.Model):
     __tablename__ = 'rereply_all'
 
@@ -290,12 +248,3 @@ class ReReplyAll(db.Model):
     community = db.relationship('CommunityAll', primaryjoin='ReReplyAll.communityID == CommunityAll.communityID', backref='rereplie_alls')
     user_info = db.relationship('UserInfo', primaryjoin='ReReplyAll.userID == UserInfo.userID', backref='rereplie_alls')
     reply = db.relationship('ReplyAll', primaryjoin='ReReplyAll.parentReplyID == ReplyAll.replyID', backref='rereplie_alls')
-
-    def serialize(self):
-        d = Serializer.serialize(self)
-        del d['article']
-        del d['community']
-        del d['user_info']
-        del d['reply']
-        d['writtenTime'] = str(d['writtenTime'])
-        return d

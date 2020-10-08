@@ -1,52 +1,52 @@
 import json, time
-from flask import Blueprint, request, current_app as app
+from flask import jsonify, make_response, escape, Blueprint, request, session, current_app as app
 from sqlalchemy import text
+from main.extensions import *
+from main.model import *
 
 article_api = Blueprint('article', __name__, url_prefix='/article')
 
+com_type = [ArticleAll, ArticleRegion, ArticleSchool]
+
 @article_api.route('/read', methods=['GET'])
+@login_required
+@allowed_access
 def get_read_article():
+    communityType = request.args.get('communityType')
     articleID = request.args.get('articleID')
-    articleType = request.args.get('articleType')
-    row = app.db.execute(
-    """
-    select articleID, isAnonymous, content, title, viewNumber, reply, heart, writtenTime, nickName
-    from article JOIN user_info ON article.userID = user_info.userID
-    where articleID = %s and communityID = %s
-    """, (articleID, articleType)).fetchone()
-    article = {}
-    if row:
-        if row[1]:
-            nickName = 'Anonymous'
-        else:
-            nickName = row[8]
+    article = com_type[communityType]
+    return json.dumps(convert_to_dict(article.query.filter_by(articleID=articleID)))
 
-        article = {'articleID': row[0], 'content':row[2], 'title':row[3],
-        'viewNumber':row[4], 'reply':row[5], 'heart':row[6], 'writtenTime':str(row[7]), 'nickName':nickName}
-    return json.dumps(article)
-
-
-def on_json_loading_failed_return_dict(e):
-    return {}
+# For future use
+# request.on_json_loading_failed = on_json_loading_failed_return_dict
+# def on_json_loading_failed_return_dict(e):
+#     return {}
 
 @article_api.route('/write', methods=['POST'])
+@login_required
+@allowed_access
 def post_write_article():
-    request.on_json_loading_failed = on_json_loading_failed_return_dict
-    article = request.json
-    if type(article) == type(''):
-        article = json.loads(article)
-
-    if article is None:
+    written_info = request.json
+    if written_info is None:
         return 'fail'
-
+    # get time and nickName info
     now = time.localtime()
-    article['time'] = "%04d/%02d/%02d %02d:%02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
-    result = app.db.execute(text(
-    """
-    INSERT INTO article (communityID, userID, isAnonymous, title, content, writtenTime)
-    VALUES (:articleType, :userId, :isAnonymous, :title, :content, :time)
-    """), article)
-    return 'success:' + str(result.lastrowid)
+    written_time = "%04d/%02d/%02d %02d:%02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
+    nickname = '익명' if written_info['isAnonymous'] else session['nick_name']
+    # generate articleID
+    article_id = (written_info['communityID'] % 100) * 100000000 + get_random_numeric_value(2) * 1000000 + current_milli_time()
+    # create article instante
+    article = com_type[written_info['communityType']]
+    new_article = article(articleID=article_id,
+    communityID=written_info['communityID'],
+    userID=session['user_id'],
+    nickName=nickname,
+    title=written_info['title'],
+    content=written_info['content'],
+    writtenTime=written_time)
+    db.session.add(new_article)
+    db.session.commit()
+    return 'success'
 
 
 @article_api.route('/delete', methods=['GET'])
@@ -100,7 +100,7 @@ def get_hot_article_list():
     sql = """
     SELECT articleID, communityID, title, content, heart, reply
     FROM article WHERE heart =
-    (SELECT max(heart) FROM article where communityID = %s)
+    (SELECT max(heart) FROM articleAll where communityID = %s)
     """
     hot_articles = []
     for id, name in app.db.execute("select * from community").fetchall():
@@ -114,6 +114,7 @@ def get_hot_article_list():
 
 
 @article_api.route('/latestArticleList', methods=['GET'])
+@login_required
 def get_latest_article_list():
     sql = """
     SELECT articleID, communityID, title, content, heart, reply
@@ -123,7 +124,5 @@ def get_latest_article_list():
     for id, name in app.db.execute("select * from community").fetchall():
         latest_article = app.db.execute(sql, id).fetchone()
         if latest_article:
-            latest_articles.append({"articleID" : latest_article["articleID"], "communityID" : latest_article["communityID"],
-            "title" : latest_article["title"][:20], "content" : latest_article["content"][:50],
-            "heart" : latest_article["heart"], "reply" : latest_article["reply"]})
+            latest_articles.append(convert_to_dict(latest_article))
     return json.dumps(latest_articles, ensure_ascii=False, indent=4)

@@ -1,56 +1,72 @@
 import json, time, requests, re
+import random
+import string
+import hashlib
+from pprint import pprint as pp
 
 import pandas as pd
 from usernames import is_safe_username
-from flask import jsonify, escape, Blueprint, request, session, current_app as app
+from flask import jsonify, make_response, escape, Blueprint, request, session, current_app as app
 from sqlalchemy import text
 from Crypto.PublicKey import RSA
-from Crypto import Random
 
-from main.extensions import flask_bcrypt
+
+from main.extensions import *
 from main.model import *
 
 login_api = Blueprint('auth', __name__, url_prefix='/auth')
 
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        session_token = session.get('token')
-        if session_token is None:
-            return "fail"
-        return f(*args, **kwargs)
-    return decorated_function
-
 @login_api.route('/login', methods=['GET'])
 def get_login():
-    user_session = {}
     uid = request.args.get('id')
     user_access_token = request.args.get('token')
+    #check if args exist
+    if not uid or not user_access_token:
+        return json.dumps({'status' : '<Fail>:1:args needment fail'})
     # check sender access token is valid
     token_info = get_request(user_access_token, '/v1/user/access_token_info')
     if not token_info or int(uid) != int(token_info['id']):
-        return '<Fail>:1:token expired'
+        return json.dumps({'status' : '<Fail>:2:token expired'})
+    # check user is signed up
     result = UserInfo.query.filter_by(userID = int(uid)).first()
     if not result:
-        return json.dumps({'status' : 'fail'})
-    # Todo: 다른 추가 정보 저장하기
-    # 복호화 하는 방법
-    # bcrypt.check_password_hash(pw_hash, 'hunter2').decode('utf-8')
-    # user_session['user_hash'] = flask_bcrypt.generate_password_hash(uid)
-    # session['token'] = user_session['user_hash']
-    result = result.serialize()
-    result['status'] = 'success'
-    return json.dumps(result)
+        return json.dumps({'status' : '<Fail>:3:user_id need to sign up'})
+    # make json response body
+    dict_resp = convert_to_dict(result)
+    dict_resp['status'] = 'success'
+    # query school info
+    schoolID = dict_resp.pop('schoolID')
+    school_dict = convert_to_dict(SchoolInfo.query.filter_by(schoolID = schoolID).first())
+    school_dict['schoolGender'] = school_dict.pop('gender')
+    dict_resp.update(school_dict)
+    dict_resp.pop('regionID')
+    dict_resp.pop('schoolID')
+    dict_resp.pop('userID')
+    # community id allowed for each user
+    allowed_ids = [com[0] for com in db.session.query(CommunityAll.communityID).all()]
+    allowed_ids.extend([com[0] for com in db.session.query(CommunitySchool.communityID).\
+    filter_by(schoolID=result.schoolID).all()])
+    allowed_ids.extend([com[0] for com in db.session.query(CommunityRegion.communityID).\
+    filter_by(regionID=result.regionID).all()])
+    # make session
+    session['user_id'] = result.userID
+    session['school_id'] = result.schoolID
+    session['region_id'] = result.regionID
+    session['allowed_ids'] = allowed_ids
+    session['nick_name'] = result.nickName
+    session['grade'] = result.grade
+    return json.dumps(dict_resp)
 
 @login_api.route('/kakaoSignup', methods=['POST'])
 def post_signup():
     pattern = re.compile("^(?!_$)(?![-.])(?!.*[_.-]{2})[가-힣a-zA-Z0-9_.-]+(?<![.-])$")
-    user_info = request.json
+    f = request.files['image']
+    f.save(f.filename)
+    user_info = json.loads(request.form['json'])
     user_access_token = escape(user_info['accessToken'])
     user_id = escape(user_info['userID'])
     email, gender, ageRange = escape(user_info['email']), escape(user_info['gender']), escape(user_info['ageRange'])
     nickName, grade = escape(user_info['nickName']), escape(user_info['grade'])
-
     # check sender access token is valid
     token_info = get_request(user_access_token, '/v1/user/access_token_info')
     if not token_info or str(user_id) != str(token_info['id']):
@@ -85,7 +101,6 @@ def post_signup():
     email=str(email), grade=int(grade), age=age, gender=gender, nickName=str(nickName))
     db.session.add(user)
     db.session.commit()
-
     return '<success>'
 
 def get_request(token, url):

@@ -1,85 +1,60 @@
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
+from flask_session import Session
+from functools import *
 
 from flask.sessions import SessionInterface, SessionMixin
 from werkzeug.datastructures import CallbackDict
-from flask import Flask, session, url_for, redirect
+from flask import Flask, session, url_for, redirect, request
 
 from uuid import uuid4
 from datetime import datetime, timedelta
 import redis
 import _pickle
+import time
+import string
+import random
+
 
 
 flask_bcrypt = Bcrypt()
 login_manager = LoginManager()
+sess = Session()
 
+current_milli_time = lambda: int(round(time.time() * 1000)) % 100000
 
-#########################################################################################
-# This is a session object. It is nothing more than a dict with some extra methods
-class RedisSession(CallbackDict, SessionMixin):
-	def __init__(self, initial=None, sid=None):
-		CallbackDict.__init__(self, initial)
-		self.sid = sid
-		self.modified = False
+def get_random_alphanumeric_string(length):
+    letters_and_digits = string.ascii_letters + string.digits
+    result_str = ''.join((random.choice(letters_and_digits) for i in range(length)))
+    return result_str
 
-#########################################################################################
-# Session interface is responsible for handling logic related to sessions
-# i.e. storing, saving, etc
-class RedisSessionInterface(SessionInterface):
-	#====================================================================================
-	# Init connection
-	def __init__(self, host='localhost', port=6379, db=0, timeout=3600, ps=1234):
-		self.store = redis.StrictRedis(host=host, port=port, db=db, password=ps)
-		self.timeout = timeout
-	#====================================================================================
-	def open_session(self, app, request):
-		# Get session id from the cookie
-		sid = request.cookies.get(app.session_cookie_name)
+def get_random_numeric_value(length):
+    digits = string.digits
+    result_str = ''.join((random.choice(digits) for i in range(length)))
+    return int(result_str)
 
-		# If id is given (session was created)
-		if sid:
-			# Try to load a session from Redisdb
-			stored_session = None
-			ssstr = self.store.get(sid)
-			if ssstr:
-				stored_session = _pickle.loads(ssstr)
-			if stored_session:
-				# Check if the session isn't expired
-				if stored_session.get('expiration') > datetime.utcnow():
-					return RedisSession(initial=stored_session['data'],
-										sid=stored_session['sid'])
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        session_token = session.get('user_id')
+        if session_token is None:
+            return "login required"
+        return f(*args, **kwargs)
+    return decorated_function
 
-		# If there was no session or it was expired...
-		# require new login
-		return False
-	#====================================================================================
-	def save_session(self, app, session, response):
-		domain = self.get_cookie_domain(app)
+def allowed_access(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        ids = session.get('allowed_ids')
+        json_data = request.json
+        print(json_data)
+        print(ids)
+        if json_data['communityID'] not in ids:
+            return "access denied"
+        return f(*args, **kwargs)
+    return decorated_function
 
-		# We're requested to delete the session
-		if not session:
-			response.delete_cookie(app.session_cookie_name, domain=domain)
-			return
-
-		# Refresh the session expiration time
-		# First, use get_expiration_time from SessionInterface
-		# If it fails, add 1 hour to current time
-		if self.get_expiration_time(app, session):
-			expiration = self.get_expiration_time(app, session)
-		else:
-			expiration = datetime.utcnow() + timedelta(hours=1)
-
-		# Update the Redis document, where sid equals to session.sid
-		ssd = {
-			'sid': session.sid,
-			'data': session,
-			'expiration': expiration
-		}
-		ssstr = _pickle.dumps(ssd)
-		self.store.setex(session.sid, self.timeout, ssstr)
-
-		# Refresh the cookie
-		response.set_cookie(app.session_cookie_name, session.sid,
-							expires=self.get_expiration_time(app, session),
-							httponly=True, domain=domain)
+def convert_to_dict(query_result):
+    dict_result = dict(query_result.__dict__)
+    dict_result.pop('_sa_instance_state', None)
+    return dict_result
