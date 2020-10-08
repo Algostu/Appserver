@@ -1,12 +1,16 @@
 import json, time
+from datetime import datetime
 from flask import jsonify, make_response, escape, Blueprint, request, session, current_app as app
-from sqlalchemy import text
+from sqlalchemy import text, desc
 from main.extensions import *
 from main.model import *
 
 article_api = Blueprint('article', __name__, url_prefix='/article')
 
 com_type = [ArticleAll, ArticleRegion, ArticleSchool]
+allowed_ids = ['allowed_all_ids', 'allowed_region_ids', 'allowed_school_ids']
+
+time_format = "%04d/%02d/%02d %02d:%02d:%02d"
 
 @article_api.route('/read', methods=['GET'])
 @login_required
@@ -14,17 +18,19 @@ com_type = [ArticleAll, ArticleRegion, ArticleSchool]
 def get_read_article():
     communityType = int(request.args.get('communityType'))
     articleID = int(request.args.get('articleID'))
+    communityID = int(request.args.get('communityID'))
     article = com_type[communityType]
     # query db and change to dict
-    query_result = article.query.filter_by(articleID=articleID).first()
+    query_result = article.query.filter_by(articleID=articleID, communityID=communityID).first()
     if not query_result:
-        return json.dumps({'status':'fail'})
+        return response_with_code("<fail>:2:no article")
     target_article = convert_to_dict(query_result)
-    target_article.pop('userID')
+    writer = target_article.pop('userID')
+    target_article['edit'] = True if writer == session['user_id'] else False
     #  increase view number
     query_result.viewNumber += 1
     db.session.commit()
-    return json.dumps(target_article)
+    return response_with_code("<success>", target_article)
 
 # For future use
 # request.on_json_loading_failed = on_json_loading_failed_return_dict
@@ -37,10 +43,10 @@ def get_read_article():
 def post_write_article():
     written_info = request.json
     if written_info is None:
-        return 'fail'
+        return response_with_code("<fail>:2:no post data")
     # get time and nickName info
     now = time.localtime()
-    written_time = "%04d/%02d/%02d %02d:%02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
+    written_time = time_format % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
     nickname = '익명' if written_info['isAnonymous'] else session['nick_name']
     # generate articleID
     article_id = (written_info['communityID'] % 100) * 10000000 + get_random_numeric_value(2) * 100000 + current_milli_time()
@@ -53,85 +59,86 @@ def post_write_article():
     title=written_info['title'],
     content=written_info['content'],
     writtenTime=written_time, heart = 0, viewNumber = 0, reply = 0)
+    # add school and region id
+    if written_info['communityType'] == 1:
+        new_article.regionID = session['region_id']
+    elif written_info['communityType'] == 2:
+        new_article.schoolID = session['school_id']
     db.session.add(new_article)
     db.session.commit()
-    return 'success'
+    return response_with_code("<success>")
 
 
 @article_api.route('/delete', methods=['GET'])
+@login_required
+@allowed_access
 def get_delete_article():
-    userID = request.args.get('userID')
-    articleID = request.args.get('articleID')
-    articleType = request.args.get('articleType')
-
-    app.db.execute(
-    """
-    DELETE from article where userID=%s and articleId=%s and communityID=%s
-    """, (userID,articleID,articleType))
-    return 'success'
+    communityType = int(request.args.get('communityType'))
+    articleID = int(request.args.get('articleID'))
+    communityID = int(request.args.get('communityID'))
+    article = com_type[communityType]
+    # query db and check if user wrote it
+    query_result = article.query.filter_by(articleID=articleID, communityID=communityID).first()
+    if not query_result:
+        return response_with_code("<fail>:2:no article")
+    if query_result.userID != session['user_id']:
+        return response_with_code("<fail>:2:no right to delete")
+    #  delete target article
+    db.session.delete(query_result)
+    db.session.commit()
+    return response_with_code("<success>")
 
 
 @article_api.route('/articleList', methods=['GET'])
+@login_required
+@allowed_access
 def get_article_list():
-    articleType = request.args.get('articleType')
-    articleTime = request.args.get('articleTime')
-    if articleTime == 'latest':
-        sql = """
-        select articleID, isAnonymous, content, title, viewNumber, reply, heart, writtenTime, nickName
-        from article JOIN user_info ON article.userID = user_info.userID
-        where communityID=%s order by articleID desc limit 25
-        """
-        rows = app.db.execute(sql, (articleType)).fetchall()
+    communityType = int(request.args.get('communityType'))
+    communityID = int(request.args.get('communityID'))
+    writtenAfter = request.args.get('writtenAfter')
+    article = com_type[communityType]
+
+    if writtenAfter == 'latest':
+        rows = article.query.filter_by(communityID=communityID).order_by(desc(article.writtenTime)).limit(15).all()
     else:
-        # 동시에 쓰는건 나중에 생각하자
-        sql = """
-        select articleID, isAnonymous, content, title, viewNumber, reply, heart, writtenTime, nickName
-        from article JOIN user_info ON article.userID = user_info.userID
-        where communityID=%s and writtenTime < %s
-        order by writtenTime desc limit 25
-        """
-        rows = app.db.execute(sql, (articleType, articleTime)).fetchall()
-    articles = [ ]
+        rows = article.query.filter(article.writtenTime<writtenAfter, article.communityID==communityID).\
+        order_by(desc(article.writtenTime)).limit(15).all()
+    articles = []
     for row in rows:
-        if row[1]:
-            nickName = 'Anonymous'
-        else:
-            nickName = row[8]
-
-        articles.append({'articleId': row[0], 'content':row[2][:25], 'title':row[3][:20],
-        'viewNumber':row[4], 'reply':row[5], 'heart':row[6], 'writtenTime':str(row[7]), 'nickName':nickName})
-
-    return json.dumps(articles)
-
+        dict_row = convert_to_dict(row)
+        dict_row.pop('userID')
+        articles.append(dict_row)
+    return response_with_code("<success>", articles)
 
 @article_api.route('/hotArticleList', methods=['GET'])
+@login_required
 def get_hot_article_list():
-    sql = """
-    SELECT articleID, communityID, title, content, heart, reply
-    FROM article WHERE heart =
-    (SELECT max(heart) FROM articleAll where communityID = %s)
-    """
-    hot_articles = []
-    for id, name in app.db.execute("select * from community").fetchall():
-        hot_article = app.db.execute(sql, id).fetchone()
-        if hot_article:
-            hot_articles.append({"articleID" : hot_article["articleID"], "communityID" : hot_article["communityID"],
-            "title" : hot_article["title"][:20], "content" : hot_article["content"][:50],
-            "heart" : hot_article["heart"], "reply" : hot_article["reply"]})
-            hot_article = None
-    return json.dumps(hot_articles, ensure_ascii=False, indent=4)
-
+    articles = []
+    for id in range(3):
+        community = com_type[id]
+        for communityID in session[allowed_ids[id]]:
+            # load heart and calculate max heart value
+            hearts = db.session.query(community.heart).filter_by(communityID=communityID).all()
+            if len(hearts) == 0:
+                continue
+            max_hearts = max([heart[0] for heart in hearts])
+            hot_article = community.query.filter_by(heart=max_hearts).first()
+            if hot_article:
+                hot_article = convert_to_dict(hot_article)
+                hot_article.pop('userID')
+                articles.append(hot_article)
+    return response_with_code("<success>", articles)
 
 @article_api.route('/latestArticleList', methods=['GET'])
 @login_required
 def get_latest_article_list():
-    sql = """
-    SELECT articleID, communityID, title, content, heart, reply
-    FROM article where communityID = %s order by writtenTime desc limit 1
-    """
-    latest_articles = []
-    for id, name in app.db.execute("select * from community").fetchall():
-        latest_article = app.db.execute(sql, id).fetchone()
-        if latest_article:
-            latest_articles.append(convert_to_dict(latest_article))
-    return json.dumps(latest_articles, ensure_ascii=False, indent=4)
+    articles = []
+    for id in range(3):
+        community = com_type[id]
+        for communityID in session[allowed_ids[id]]:
+            article = community.query.order_by(desc(community.writtenTime)).filter_by(communityID=communityID).first()
+            if article:
+                article = convert_to_dict(article)
+                article.pop('userID')
+                articles.append(article)
+    return response_with_code("<success>", articles)

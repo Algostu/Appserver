@@ -13,6 +13,7 @@ import redis
 import _pickle
 import time
 import string
+import json
 import random
 
 
@@ -22,6 +23,9 @@ login_manager = LoginManager()
 sess = Session()
 
 current_milli_time = lambda: int(round(time.time() * 1000)) % 100000
+
+def response_with_code(status, body=None):
+    return json.dumps({'status':status, 'body':body})
 
 def get_random_alphanumeric_string(length):
     letters_and_digits = string.ascii_letters + string.digits
@@ -38,7 +42,7 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         session_token = session.get('user_id')
         if session_token is None:
-            return "login required"
+            return response_with_code("<fail>:2:login required")
         return f(*args, **kwargs)
     return decorated_function
 
@@ -49,7 +53,7 @@ def allowed_access(f):
         id = int(json_data['communityID']) if json_data else int(request.args.get('communityID'))
         ids = session.get('allowed_ids')
         if id not in ids:
-            return "access denied"
+            return response_with_code("<fail>:2:access denied")
         return f(*args, **kwargs)
     return decorated_function
 

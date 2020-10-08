@@ -200,7 +200,7 @@ class ReplySchool(db.Model):
 class ReReplySchool(db.Model):
     __tablename__ = 'rereply_school'
 
-    reReplyID = db.Column(db.Integer, primary_key=True)
+    replyID = db.Column(db.Integer, primary_key=True)
     parentReplyID = db.Column(db.ForeignKey('reply_school.replyID', ondelete='CASCADE'), index=True)
     articleID = db.Column(db.ForeignKey('article_school.articleID', ondelete='CASCADE'), index=True)
     communityID = db.Column(db.ForeignKey('community_school.communityID', ondelete='CASCADE'), index=True)
@@ -218,7 +218,7 @@ class ReReplySchool(db.Model):
 class ReReplyRegion(db.Model):
     __tablename__ = 'rereply_region'
 
-    reReplyID = db.Column(db.Integer, primary_key=True)
+    replyID = db.Column(db.Integer, primary_key=True)
     parentReplyID = db.Column(db.ForeignKey('reply_region.replyID', ondelete='CASCADE'), index=True)
     articleID = db.Column(db.ForeignKey('article_region.articleID', ondelete='CASCADE'), index=True)
     communityID = db.Column(db.ForeignKey('community_region.communityID', ondelete='CASCADE'), index=True)
@@ -235,7 +235,7 @@ class ReReplyRegion(db.Model):
 class ReReplyAll(db.Model):
     __tablename__ = 'rereply_all'
 
-    reReplyID = db.Column(db.Integer, primary_key=True)
+    replyID = db.Column(db.Integer, primary_key=True)
     parentReplyID = db.Column(db.ForeignKey('reply_all.replyID', ondelete='CASCADE'), index=True)
     articleID = db.Column(db.ForeignKey('article_all.articleID', ondelete='CASCADE'), index=True)
     communityID = db.Column(db.ForeignKey('community_all.communityID', ondelete='CASCADE'), index=True)

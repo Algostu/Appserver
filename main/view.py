@@ -2,7 +2,7 @@ from flask import Blueprint
 from article.view import article_api
 from login.view import login_api
 from search.view import search_api
-from reply.view import reply_api
+from replys.view import reply_api
 
 main_api = Blueprint('main', __name__, url_prefix='/')
 
