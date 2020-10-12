@@ -107,6 +107,7 @@ class SchoolInfo(db.Model):
     __tablename__ = 'school_info'
 
     schoolID = db.Column(db.Integer, primary_key=True)
+    studentNum = db.Column(db.Integer)
     regionID = db.Column(db.ForeignKey('region_info.regionID', ondelete='CASCADE'), index=True)
     regionName = db.Column(db.String(100, 'utf8_unicode_ci'))
     townName = db.Column(db.String(100, 'utf8_unicode_ci'))
@@ -123,6 +124,7 @@ class CafeteriaInfo(db.Model):
 
     schoolID = db.Column(db.Integer, primary_key=True)
     regionID = db.Column(db.ForeignKey('region_info.regionID', ondelete='CASCADE'), index=True)
+    version = db.Column(db.DateTime)
     cafeMenu = db.Column(db.String(7000, 'utf8_unicode_ci'))
 
 

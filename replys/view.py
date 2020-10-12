@@ -24,24 +24,25 @@ def get_read_reply():
     reply = reply_type[communityType]
     re_reply = reReply_type[communityType]
     # query db and change to dict
-    query_result = reply.query.filter_by(articleID=articleID, communityID=communityID).all()
+    query_result = reply.query.filter_by(articleID=articleID, communityID=communityID).order_by(reply.writtenTime).all()
     if not query_result:
         return response_with_code('<success>', [])
     # process replys
     replys = []
     for row in query_result:
         re = convert_to_dict(row)
+        re['parentReplyID'] = 0
         re['edit'] = True if re.pop('userID') == session['user_id'] else False
         replys.append(re)
     # process re-replys
     re_replys = []
-    query_result = re_reply.query.filter_by(articleID=articleID, communityID=communityID).all()
+    query_result = re_reply.query.filter_by(articleID=articleID, communityID=communityID).order_by(re_reply.writtenTime).all()
     if query_result:
         for row in query_result:
             re = convert_to_dict(row)
             re['edit'] = True if re.pop('userID') == session['user_id'] else False
             re_replys.append(re)
-    return response_with_code("<success>", replys + re_replys)
+    return response_with_code("<success>", {"replys":replys, "reReplys":re_replys})
 
 # For future use
 # request.on_json_loading_failed = on_json_loading_failed_return_dict
@@ -83,7 +84,7 @@ def post_write_reply():
     elif written_info['communityType'] == 2:
         new_reply.schoolID = session['school_id']
     # add parent id if rereply are written
-    if written_info['parentID'] == 1:
+    if written_info['parentID'] != 0:
         new_reply.parentReplyID = written_info['parentID']
     db.session.add(new_reply)
     db.session.commit()

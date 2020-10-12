@@ -57,12 +57,30 @@ class cafeteriaCrawler(crawler):
     def get_json(self):
         url = 'portal/sensuousmenu/selectSchoolMonthMealsDetail.do'
         school_list = self.get_list()
+
         now = time.localtime()
+        curYear = now.tm_year
+        curMonth = now.tm_mon
+        curDay = now.tm_mday
+        nextYear = curYear
+        nextMonth = curMonth + 1
+
+        if curMonth == 12:
+            nextYear = curYear + 1
+            nextMonth = 1
+
+        cur_data = self.get_data_per_month(url, school_list, curYear, curMonth)
+        next_data = self.get_data_per_month(url, school_list, nextYear, nextMonth) if curDay >= 15 else []
+        final_data = {'curMonth':cur_data, 'nextMonth':next_data}
+        self.save_json(str(now.tm_year)+'-'+str(now.tm_mon)+'-'+str(now.tm_mday)+'-'+'cafeteria_menu_per_school', final_data)
+        self.save_json('school_list', school_list)
+
+    def get_data_per_month(self, url, school_list, year, month):
         post_data = {
             'schl_cd' : "",
             'type_cd' : 'M',
-            'year' : now.tm_year,
-            'month' : now.tm_mon,
+            'year' : year,
+            'month' : month,
         }
         cafe_menu_per_school = {}
         for region, schools in tqdm(school_list.items()):
@@ -74,9 +92,8 @@ class cafeteriaCrawler(crawler):
                 region_school[school['name']] = menus
 
             cafe_menu_per_school[region] = region_school
+        return cafe_menu_per_school
 
-        self.save_json(str(now.tm_year)+'-'+str(now.tm_mon)+'-'+'cafeteria_menu_per_school', cafe_menu_per_school)
-        self.save_json('school_list', school_list)
 
 
 if __name__ == '__main__':
