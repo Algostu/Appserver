@@ -12,6 +12,7 @@ from flask_script import Command, Manager, Option
 from schoolInfoDB import schoolDB
 from cafeteriaDB import cafeDB
 from communityDB import communityDB
+from contestDB import contestDB
 
 class dbAdapter(Command):
     option_list = (
@@ -28,3 +29,6 @@ class dbAdapter(Command):
         elif type=='initialCommunity' or type=='I':
             community = communityDB()
             community.run()
+        elif type=='contest' or type=='T':
+            contest = contestDB()
+            contest.run()

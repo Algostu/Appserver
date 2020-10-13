@@ -2,9 +2,44 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.inspection import inspect
 from sqlalchemy.schema import FetchedValue
+from flask_security import Security, SQLAlchemyUserDatastore, \
+    UserMixin, RoleMixin
 
 
 db = SQLAlchemy()
+
+# Define models
+roles_users = db.Table(
+    'roles_users',
+    db.Column('user_id', db.Integer(), db.ForeignKey('web_user.id')),
+    db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
+)
+
+
+class Role(db.Model, RoleMixin):
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    description = db.Column(db.String(255))
+
+    def __str__(self):
+        return self.name
+
+
+class WebUser(db.Model, UserMixin):
+    __tablename__ = 'web_user'
+
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(255))
+    last_name = db.Column(db.String(255))
+    email = db.Column(db.String(255), unique=True)
+    password = db.Column(db.String(255))
+    active = db.Column(db.Boolean())
+    confirmed_at = db.Column(db.DateTime())
+    roles = db.relationship('Role', secondary=roles_users,
+                            backref=db.backref('web_users', lazy='dynamic'))
+
+    def __str__(self):
+        return self.email
 
 class Serializer(object):
 
@@ -44,7 +79,7 @@ class ArticleAll(db.Model):
 
     articleID = db.Column(db.Integer, primary_key=True)
     communityID = db.Column(db.ForeignKey('community_all.communityID', ondelete='CASCADE'), index=True)
-    userID = db.Column(db.ForeignKey('user_info.userID'), index=True)
+    userID = db.Column(db.ForeignKey('user_info.userID', ondelete='CASCADE'), index=True)
     nickName = db.Column(db.String(20, 'utf8_unicode_ci'), nullable=False)
     title = db.Column(db.String(50, 'utf8_unicode_ci'))
     content = db.Column(db.String(5000, 'utf8_unicode_ci'))
@@ -56,14 +91,13 @@ class ArticleAll(db.Model):
     community = db.relationship('CommunityAll', primaryjoin='ArticleAll.communityID == CommunityAll.communityID', backref='article_alls')
     user_info = db.relationship('UserInfo', primaryjoin='ArticleAll.userID == UserInfo.userID', backref='article_alls')
 
-
 class ArticleRegion(db.Model):
     __tablename__ = 'article_region'
 
     articleID = db.Column(db.Integer, primary_key=True)
     communityID = db.Column(db.ForeignKey('community_region.communityID', ondelete='CASCADE'), index=True)
     regionID = db.Column(db.ForeignKey('region_info.regionID', ondelete='CASCADE'), index=True)
-    userID = db.Column(db.ForeignKey('user_info.userID'), index=True)
+    userID = db.Column(db.ForeignKey('user_info.userID', ondelete='CASCADE'), index=True)
     nickName = db.Column(db.String(20, 'utf8_unicode_ci'), nullable=False)
     title = db.Column(db.String(50, 'utf8_unicode_ci'))
     content = db.Column(db.String(5000, 'utf8_unicode_ci'))
@@ -83,7 +117,7 @@ class ArticleSchool(db.Model):
     articleID = db.Column(db.Integer, primary_key=True)
     communityID = db.Column(db.ForeignKey('community_school.communityID', ondelete='CASCADE'), index=True)
     schoolID = db.Column(db.ForeignKey('school_info.schoolID', ondelete='CASCADE'), nullable=False, index=True)
-    userID = db.Column(db.ForeignKey('user_info.userID'), index=True)
+    userID = db.Column(db.ForeignKey('user_info.userID', ondelete='CASCADE'), index=True)
     nickName = db.Column(db.String(20, 'utf8_unicode_ci'), nullable=False)
     title = db.Column(db.String(50, 'utf8_unicode_ci'))
     content = db.Column(db.String(5000, 'utf8_unicode_ci'))
@@ -127,6 +161,21 @@ class CafeteriaInfo(db.Model):
     version = db.Column(db.DateTime)
     cafeMenu = db.Column(db.String(7000, 'utf8_unicode_ci'))
 
+class ContestInfo(db.Model):
+    __tablename__ = 'contest_info'
+
+    contestID = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100, 'utf8_unicode_ci'))
+    imageUrl = db.Column(db.String(100, 'utf8_unicode_ci'))
+    content = db.Column(db.String(7000, 'utf8_unicode_ci'))
+    area = db.Column(db.String(100, 'utf8_unicode_ci'))
+    sponsor = db.Column(db.String(100, 'utf8_unicode_ci'))
+    start = db.Column(db.String(100, 'utf8_unicode_ci'))
+    end = db.Column(db.String(100, 'utf8_unicode_ci'))
+    prize = db.Column(db.String(100, 'utf8_unicode_ci'))
+    firstPrize = db.Column(db.String(100, 'utf8_unicode_ci'))
+    homePage = db.Column(db.String(100, 'utf8_unicode_ci'))
+
 
 class UserCredential(db.Model):
     __tablename__ = 'user_credential'
@@ -141,6 +190,11 @@ class UserInfo(db.Model):
 
     userID = db.Column(db.Integer, primary_key=True)
     schoolID = db.Column(db.ForeignKey('school_info.schoolID', ondelete='CASCADE'), nullable=False, index=True)
+    schoolName = db.Column(db.String(100, 'utf8_unicode_ci'), nullable=False)
+    regionName = db.Column(db.String(100, 'utf8_unicode_ci'), nullable=False)
+    studentName = db.Column(db.String(100, 'utf8_unicode_ci'), nullable=False)
+    authorized = db.Column(db.Integer)
+    signupDate = db.Column(db.DateTime)
     regionID = db.Column(db.ForeignKey('region_info.regionID', ondelete='CASCADE'), index=True)
     email = db.Column(db.String(100, 'utf8_unicode_ci'), nullable=False)
     age = db.Column(db.Integer, nullable=False)

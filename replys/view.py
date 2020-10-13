@@ -71,8 +71,7 @@ def post_write_reply():
     # create article instante
     reply= reply_type[written_info['communityType']] if written_info['parentID'] == 0 \
         else reReply_type[written_info['communityType']]
-    new_reply = reply(replyID=reply_id,
-    articleID = written_info['articleID'],
+    new_reply = reply(articleID = written_info['articleID'],
     communityID=written_info['communityID'],
     userID=session['user_id'],
     nickName=nickname,

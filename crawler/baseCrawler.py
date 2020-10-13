@@ -1,5 +1,6 @@
 import requests
 import json
+from bs4 import BeautifulSoup
 
 class crawler:
     def __init__(self, base_url):
@@ -10,7 +11,22 @@ class crawler:
             response = requests.post(self.BASE_URL + url, data = data)
             return response.json()
         except Exception as e:
-            print('get_json function exception occur', e)
+            print('post_url function exception occur', e)
+
+    def get_url(self, url):
+        try:
+            response = requests.get(url)
+            return response
+        except Exception as e:
+            print('get_url function exception occur', e)
+
+    def get_soup(self, url):
+        try:
+            response = self.get_url(self.BASE_URL+url)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            return soup
+        except Exception as e:
+            print('get_soup function exception occur', e)
 
     def save_json(self, file_name, json_data):
         with open("data/"+file_name+'.json', "w", encoding = 'utf8') as json_file:

@@ -26,7 +26,7 @@ def get_read_article():
         return response_with_code("<fail>:2:no article")
     target_article = convert_to_dict(query_result)
     writer = target_article.pop('userID')
-    target_article['edit'] = True if writer == session['user_id'] else False
+    target_article['edit'] = 1 if writer == session['user_id'] else 0
     #  increase view number
     query_result.viewNumber += 1
     db.session.commit()
@@ -40,6 +40,7 @@ def get_read_article():
 @article_api.route('/write', methods=['POST'])
 @login_required
 @allowed_access
+@user_have_write_right
 def post_write_article():
     written_info = request.json
     if written_info is None:
@@ -52,8 +53,7 @@ def post_write_article():
     article_id = (written_info['communityID'] % 100) * 10000000 + get_random_numeric_value(2) * 100000 + current_milli_time()
     # create article instante
     article = com_type[written_info['communityType']]
-    new_article = article(articleID=article_id,
-    communityID=written_info['communityID'],
+    new_article = article(communityID=written_info['communityID'],
     userID=session['user_id'],
     nickName=nickname,
     title=written_info['title'],
@@ -72,6 +72,7 @@ def post_write_article():
 @article_api.route('/delete', methods=['GET'])
 @login_required
 @allowed_access
+@user_have_write_right
 def get_delete_article():
     communityType = int(request.args.get('communityType'))
     articleID = int(request.args.get('articleID'))

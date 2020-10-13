@@ -12,8 +12,10 @@ cafeteria_api = Blueprint('cafeteria', __name__, url_prefix='/cafeteria')
 def get_read_cafeMenu():
     version = request.args.get('version')
     school_id = session['school_id']
-    if CafeteriaInfo.query.filter_by(schoolID=school_id, version=version).all():
-        return response_with_code('<fail>:2:no need to re-download it')
+    cafe = CafeteriaInfo.query.filter_by(schoolID=school_id, version=version).first()
+    if cafe:
+        if str(cafe.version).split(' ')[0] == version:
+            return response_with_code('<fail>:2:no need to re-download it', {'curMonth':[], 'nextMonth':[], 'version':version})
     result = CafeteriaInfo.query.filter_by(schoolID=school_id).first()
     dict_row = convert_to_dict(result)
     dict_row.pop('schoolID')

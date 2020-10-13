@@ -17,6 +17,11 @@ class Config:
     SESSION_COOKIE_NAME = 'session_id'
     SESSION_TYPE = 'redis'
     SESSION_REDIS = redis.from_url('redis://:1234@localhost:6379')
+    FLASK_ADMIN_SWATCH = 'cerulean'
+    SECURITY_REGISTERABLE = True
+    SECURITY_PASSWORD_SALT = 'adfkj;ldkfj998dk'
+    MAIL_SERVER='smtp.gmail.com'
+    MAIL_PORT = 465
 
 class DevelopmentConfig(Config):
 	# uncomment the line below to use postgres

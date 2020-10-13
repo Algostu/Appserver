@@ -5,13 +5,17 @@ from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager, Command, Server
 
 from main import create_app
-from main.model import db
+from main.model import *
 from crawler.db.crawlerDB import dbAdapter
 
 app = create_app('dev')
 app.app_context().push()
 migrate = Migrate(app, db)
 crawlerAdapter = dbAdapter()
+
+@app.route('/google0967c7b0f58970a0.html')
+def test():
+	return 'google-site-verification: google0967c7b0f58970a0.html'
 
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)

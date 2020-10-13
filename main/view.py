@@ -4,6 +4,8 @@ from login.view import login_api
 from search.view import search_api
 from replys.view import reply_api
 from cafeteria.view import cafeteria_api
+from contest.view import contest_api
+from admin.view import admin_api
 
 main_api = Blueprint('main', __name__, url_prefix='/')
 
@@ -11,4 +13,4 @@ main_api = Blueprint('main', __name__, url_prefix='/')
 def main():
     return 'hello'
 
-api_urls = [article_api, login_api, search_api, main_api, reply_api, cafeteria_api]
+api_urls = [article_api, login_api, search_api, main_api, reply_api, cafeteria_api, contest_api, admin_api]

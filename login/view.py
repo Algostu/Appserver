@@ -42,6 +42,8 @@ def get_login():
     dict_resp.pop('regionID')
     dict_resp.pop('schoolID')
     dict_resp.pop('userID')
+    dict_resp['userName'] = dict_resp.pop('studentName')
+    dict_resp['signupDate'] = str(dict_resp.pop('signupDate'))
     # community id allowed for each user
     coms_all = [convert_to_dict(row) for row in CommunityAll.query.all()]
     community_all_ids = [com['communityID'] for com in coms_all]
@@ -63,6 +65,7 @@ def get_login():
     dict_resp['comAll'] = coms_all
     dict_resp['comRegion'] = coms_region
     dict_resp['comSchool'] = coms_school
+    dict_resp['authorized'] = result.authorized
     # make session
     session['user_id'] = result.userID
     session['school_id'] = result.schoolID
@@ -71,6 +74,7 @@ def get_login():
     session['allowed_school_ids'] = community_school_ids
     session['allowed_region_ids'] = community_region_ids
     session['allowed_ids'] = community_all_ids + community_school_ids + community_region_ids
+    session['authorized'] = result.authorized
     session['nick_name'] = result.nickName
     session['grade'] = result.grade
     return response_with_code("<success>", dict_resp)
@@ -78,13 +82,12 @@ def get_login():
 @login_api.route('/kakaoSignup', methods=['POST'])
 def post_signup():
     pattern = re.compile("^(?!_$)(?![-.])(?!.*[_.-]{2})[가-힣a-zA-Z0-9_.-]+(?<![.-])$")
-    f = request.files['image']
-    f.save(f.filename)
-    user_info = json.loads(request.form['json'])
+    user_info = request.json
     user_access_token = escape(user_info['accessToken'])
     user_id = escape(user_info['userID'])
     email, gender, ageRange = escape(user_info['email']), escape(user_info['gender']), escape(user_info['ageRange'])
     nickName, grade = escape(user_info['nickName']), escape(user_info['grade'])
+    user_name = str(escape(user_info['userName']))
     # check sender access token is valid
     token_info = get_request(user_access_token, '/v1/user/access_token_info')
     if not token_info or str(user_id) != str(token_info['id']):
@@ -103,6 +106,8 @@ def post_signup():
     schoolInfo = SchoolInfo.query.filter_by(schoolID = user_info['schoolID']).first()
     if not schoolInfo:
         return response_with_code("<Fail>:2:school id is not good")
+    sch_name = schoolInfo.schoolName
+    reg_name = schoolInfo.regionName
     sch_gen = schoolInfo.gender
     sch_reg = schoolInfo.regionID
     if (sch_gen == 1 and gender != 'male') or (sch_gen == 2 and gender != 'female'):
@@ -116,7 +121,8 @@ def post_signup():
     gender = 1 if str(gender) == 'male' else 2
     age = 1 if str(ageRange) == "14~19" else 2
     user = UserInfo(userID=int(user_id), schoolID=user_info['schoolID'], regionID=sch_reg,
-    email=str(email), grade=int(grade), age=age, gender=gender, nickName=str(nickName))
+    email=str(email), grade=int(grade), age=age, gender=gender, nickName=str(nickName),
+    studentName=user_name,schoolName=sch_name,regionName=reg_name,authorized=0,signupDate=get_cur_date())
     db.session.add(user)
     db.session.commit()
     return response_with_code('<success>')
