@@ -13,8 +13,8 @@ class communityDB(baseDB):
     def __init__(self):
         super().__init__()
         # Todo : community ListUp
-        self.all_communityList = ['입시', '학원', '인강', '질문', '자유']
-        self.region_communityList = ['질문', '자유']
+        self.all_communityList = ['학원/인강', '질문', '자유']
+        self.region_communityList = ['질문', '모집', '자유']
         self.school_communityList = ['질문', '자유']
 
     def register_all_communityList(self):

@@ -1,4 +1,5 @@
 import json, time
+from pprint import pprint as pp
 from datetime import datetime
 from flask import jsonify, make_response, escape, Blueprint, request, session, current_app as app
 from sqlalchemy import text, desc
@@ -8,6 +9,7 @@ from main.model import *
 article_api = Blueprint('article', __name__, url_prefix='/article')
 
 com_type = [ArticleAll, ArticleRegion, ArticleSchool]
+heart_type = [LikeToAll, LikeToRegion, LikeToSchool]
 allowed_ids = ['allowed_all_ids', 'allowed_region_ids', 'allowed_school_ids']
 
 time_format = "%04d/%02d/%02d %02d:%02d:%02d"
@@ -20,17 +22,57 @@ def get_read_article():
     articleID = int(request.args.get('articleID'))
     communityID = int(request.args.get('communityID'))
     article = com_type[communityType]
+    heart = heart_type[communityType]
+    heart_pushed = 0
     # query db and change to dict
     query_result = article.query.filter_by(articleID=articleID, communityID=communityID).first()
     if not query_result:
         return response_with_code("<fail>:2:no article")
+    query_result2 = heart.query.filter_by(articleID=articleID, userID=session['user_id']).first()
+    if query_result2:
+        heart_pushed = 1
     target_article = convert_to_dict(query_result)
     writer = target_article.pop('userID')
     target_article['edit'] = 1 if writer == session['user_id'] else 0
+    target_article['heartPushed'] = heart_pushed
     #  increase view number
     query_result.viewNumber += 1
     db.session.commit()
     return response_with_code("<success>", target_article)
+
+@article_api.route('/modifyHeart', methods=['GET'])
+@login_required
+@allowed_access
+def get_modify_heart():
+    communityType = int(request.args.get('communityType'))
+    articleID = int(request.args.get('articleID'))
+    communityID = int(request.args.get('communityID'))
+    op = int(request.args.get('op'))
+    article = com_type[communityType]
+    heart = heart_type[communityType]
+    # query db and change to dict
+    query_result = article.query.filter_by(articleID=articleID, communityID=communityID).first()
+    if not query_result:
+        return response_with_code("<fail>:2:no article")
+    query_result2 = heart.query.filter_by(articleID=articleID, userID=session['user_id']).first()
+    if op == 1:
+        if query_result2:
+            return response_with_code("<fail>:2:already add heart")
+        else:
+            new_heart = heart(articleID=articleID, userID=session['user_id'])
+            db.session.add(new_heart)
+    elif op == 0:
+        if not query_result2:
+            return response_with_code("<fail>:2:did not add heart")
+        else:
+            db.session.delete(query_result2)
+    #  increase view number
+    if op == 1:
+        query_result.heart += 1
+    else:
+        query_result.heart -= 1
+    db.session.commit()
+    return response_with_code("<success>")
 
 # For future use
 # request.on_json_loading_failed = on_json_loading_failed_return_dict
@@ -119,15 +161,18 @@ def get_hot_article_list():
         community = com_type[id]
         for communityID in session[allowed_ids[id]]:
             # load heart and calculate max heart value
+            # print('communityID',communityID)
             hearts = db.session.query(community.heart).filter_by(communityID=communityID).all()
             if len(hearts) == 0:
                 continue
             max_hearts = max([heart[0] for heart in hearts])
-            hot_article = community.query.filter_by(heart=max_hearts).first()
+            hot_article = community.query.filter_by(heart=max_hearts, communityID=communityID).first()
             if hot_article:
                 hot_article = convert_to_dict(hot_article)
                 hot_article.pop('userID')
+                hot_article['communityType'] = id
                 articles.append(hot_article)
+    # pp(articles)
     return response_with_code("<success>", articles)
 
 @article_api.route('/latestArticleList', methods=['GET'])
@@ -141,5 +186,7 @@ def get_latest_article_list():
             if article:
                 article = convert_to_dict(article)
                 article.pop('userID')
+                article['communityType'] = id
                 articles.append(article)
+
     return response_with_code("<success>", articles)

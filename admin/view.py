@@ -41,6 +41,7 @@ class MyModelView(sqla.ModelView):
 class MicroBlogModelView(MyModelView):
     can_delete = False  # disable model deletion
     page_size = 50  # the number of entries to display on the list view
+    can_create = True
 
 class UserControl(MicroBlogModelView):
     # column_filters = ['schoolID', 'regionID']
@@ -56,6 +57,7 @@ class UserControl(MicroBlogModelView):
 
 
 admin.add_view(UserControl(UserInfo, db.session, endpoint='acces/control', category="Auth"))
+admin.add_view(MicroBlogModelView(ArticleAll, db.session, endpoint='article/control', category="Article"))
 
 # Flask views
 @admin_api.route('/')

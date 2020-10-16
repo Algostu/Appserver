@@ -16,6 +16,25 @@ from main.model import *
 
 login_api = Blueprint('auth', __name__, url_prefix='/auth')
 
+@login_api.route('/logout', methods=['GET'])
+@login_required
+def get_logout():
+    session.clear()
+    return response_with_code('<success>')
+
+@login_api.route('/withdraw', methods=['GET'])
+@login_required
+def get_signout():
+    uid = request.args.get('id')
+    if session['user_id'] != uid:
+        response_with_code('<Fail>:2:args needment fail')
+    user = UserInfo.query.filter_by(userID = uid).first()
+    signout_user = SignOutUser(userID=uid, writtenTime=get_cur_date())
+    db.session.add(signout_user)
+    db.session.delete(user)
+    db.session.commit()
+    return response_with_code('<success>')
+
 @login_api.route('/login', methods=['GET'])
 def get_login():
     uid = request.args.get('id')
@@ -27,6 +46,10 @@ def get_login():
     token_info = get_request(user_access_token, '/v1/user/access_token_info')
     if not token_info or int(uid) != int(token_info['id']):
         return response_with_code('<Fail>:2:token expired')
+    # check reasign in 30 days
+    sign_user = SignOutUser.query.filter_by(userID = uid).first()
+    if sign_user:
+        return response_with_code('<Fail>:2:You can not re assign in 30 days ')
     # check user is signed up
     result = UserInfo.query.filter_by(userID = int(uid)).first()
     if not result:
@@ -79,6 +102,10 @@ def get_login():
     session['grade'] = result.grade
     return response_with_code("<success>", dict_resp)
 
+@login_api.route('/kakaoOauth', methods=['GET'])
+def post_oauth():
+    print(request)
+
 @login_api.route('/kakaoSignup', methods=['POST'])
 def post_signup():
     pattern = re.compile("^(?!_$)(?![-.])(?!.*[_.-]{2})[가-힣a-zA-Z0-9_.-]+(?<![.-])$")
@@ -98,6 +125,10 @@ def post_signup():
     auth_user_info['kakao_account']['gender'] != gender or \
     auth_user_info['kakao_account']['age_range'] != ageRange:
         return response_with_code('<Fail>:2:sender info is not valid')
+    # check reasign in 30 days
+    sign_user = SignOutUser.query.filter_by(userID = user_id).first()
+    if sign_user:
+        return response_with_code('<Fail>:2:You can not re assign in 30 days ')
     # check if nickName and grade is valid
     ## Todo : nickName validation test
     if not pattern.search(nickName).group() or int(grade) < 9 or int(grade) > 13:

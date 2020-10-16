@@ -50,11 +50,48 @@ class Serializer(object):
     def serialize_list(l):
         return [m.serialize() for m in l]
 
+class SignOutUser(db.Model):
+    __tablename__ = 'signout_user'
+
+    userID = db.Column(db.Integer, primary_key=True)
+    writtenTime = db.Column(db.DateTime)
+
 class CommunityAll(db.Model):
     __tablename__ = 'community_all'
 
     communityID = db.Column(db.Integer, primary_key=True)
     communityName = db.Column(db.String(20, 'utf8_unicode_ci'))
+
+class LikeToAll(db.Model):
+    __tablename__ = 'like_to_all'
+
+    likeID = db.Column(db.Integer, primary_key=True)
+    userID = db.Column(db.ForeignKey('user_info.userID', ondelete='CASCADE'), index=True)
+    articleID = db.Column(db.ForeignKey('article_all.articleID', ondelete='CASCADE'), index=True)
+
+    user_info = db.relationship('UserInfo', primaryjoin='LikeToAll.userID == UserInfo.userID', backref='like_to_alls')
+    article = db.relationship('ArticleAll', primaryjoin='LikeToAll.articleID == ArticleAll.articleID', backref='like_to_alls')
+
+class LikeToSchool(db.Model):
+    __tablename__ = 'like_to_school'
+
+    likeID = db.Column(db.Integer, primary_key=True)
+    userID = db.Column(db.ForeignKey('user_info.userID', ondelete='CASCADE'), index=True)
+    articleID = db.Column(db.ForeignKey('article_school.articleID', ondelete='CASCADE'), index=True)
+
+    user_info = db.relationship('UserInfo', primaryjoin='LikeToSchool.userID == UserInfo.userID', backref='like_to_schools')
+    article = db.relationship('ArticleSchool', primaryjoin='LikeToSchool.articleID == ArticleSchool.articleID', backref='like_to_schools')
+
+class LikeToRegion(db.Model):
+    __tablename__ = 'like_to_region'
+
+    likeID = db.Column(db.Integer, primary_key=True)
+    userID = db.Column(db.ForeignKey('user_info.userID', ondelete='CASCADE'), index=True)
+    articleID = db.Column(db.ForeignKey('article_region.articleID', ondelete='CASCADE'), index=True)
+
+    user_info = db.relationship('UserInfo', primaryjoin='LikeToRegion.userID == UserInfo.userID', backref='like_to_regions')
+    article = db.relationship('ArticleRegion', primaryjoin='LikeToRegion.articleID == ArticleRegion.articleID', backref='like_to_regions')
+
 
 class CommunityRegion(db.Model):
     __tablename__ = 'community_region'

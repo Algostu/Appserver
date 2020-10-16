@@ -37,7 +37,8 @@ class contestCrawler(crawler):
             content_info = {key : "" for key in self.category.values()}
             content_info['title'] = soup.find('div', {'class':'tit-area'}).h6.text
             content_info['imageUrl'] = self.BASE_URL + soup.find('div', {'class':'thumb'}).img['src']
-            content = soup.find('div', {'id':'viewContents'}).text.strip(u'\r\t\n').replace(u'\xa0', u'')
+            content = soup.find('div', {'id':'viewContents'}).text.strip(u'\r\t\n').replace(u'\t\n', u'\n')
+            # content = soup.find('div', {'id':'viewContents'}).text
             content_info['content'] = content
             infos = soup.find('ul', {'class', 'cd-info-list'}).find_all('li')
             for info in infos:

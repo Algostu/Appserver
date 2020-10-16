@@ -11,6 +11,7 @@ from crawler.db.crawlerDB import dbAdapter
 app = create_app('dev')
 app.app_context().push()
 migrate = Migrate(app, db)
+# db.create_all()
 crawlerAdapter = dbAdapter()
 
 @app.route('/google0967c7b0f58970a0.html')

@@ -16,7 +16,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://" + db['user'] + ":" + db['password'] + "@" + db['host'] + ":" + db['port'] + '/' + db['database'] + "?charset=utf8"
     SESSION_COOKIE_NAME = 'session_id'
     SESSION_TYPE = 'redis'
-    SESSION_REDIS = redis.from_url('redis://:1234@localhost:6379')
+    SESSION_REDIS = redis.from_url('redis://:123456789q@localhost:6379')
     FLASK_ADMIN_SWATCH = 'cerulean'
     SECURITY_REGISTERABLE = True
     SECURITY_PASSWORD_SALT = 'adfkj;ldkfj998dk'
