@@ -190,6 +190,16 @@ class SchoolInfo(db.Model):
     region_info = db.relationship('RegionInfo', primaryjoin='SchoolInfo.regionID == RegionInfo.regionID', backref='school_infos')
 
 
+class UnivInfo(db.Model):
+    __tablename__ = 'univ_info'
+
+    univID = db.Column(db.Integer, primary_key=True)
+    univName = db.Column(db.String(100, 'utf8_unicode_ci'))
+    subRegion = db.Column(db.String(100, 'utf8_unicode_ci'))
+    homePage = db.Column(db.String(1000, 'utf8_unicode_ci'))
+    eduHomePage = db.Column(db.String(300, 'utf8_unicode_ci'))
+    logoPossible = db.Column(db.Integer)
+
 class CafeteriaInfo(db.Model):
     __tablename__ = 'cafeteria_info'
 

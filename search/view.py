@@ -19,3 +19,12 @@ def get_schoolList():
     schoolList = SchoolInfo.query.filter(SchoolInfo.schoolName.like('%'+search_text+'%'))
     df = pd.read_sql(schoolList.statement, schoolList.session.bind)
     return response_with_code("<success>", json.loads(df.to_json(orient='records', force_ascii=False)))
+
+@search_api.route('/univList', methods=['GET'])
+def get_univList():
+    search_text = escape(request.args.get('univName')).strip('대학교')
+    if not search_text or search_text == "":
+        return response_with_code("<fail>:2:invalid search text")
+    schoolList = UnivInfo.query.filter(UnivInfo.univName.like('%'+search_text+'%'))
+    df = pd.read_sql(schoolList.statement, schoolList.session.bind)
+    return response_with_code("<success>", json.loads(df.to_json(orient='records', force_ascii=False)))

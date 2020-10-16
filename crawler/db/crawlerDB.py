@@ -13,6 +13,7 @@ from schoolInfoDB import schoolDB
 from cafeteriaDB import cafeDB
 from communityDB import communityDB
 from contestDB import contestDB
+from univDB import univDB
 
 class dbAdapter(Command):
     option_list = (
@@ -32,3 +33,6 @@ class dbAdapter(Command):
         elif type=='contest' or type=='T':
             contest = contestDB()
             contest.run()
+        elif type=='univ' or type=='U':
+            univ = univDB()
+            univ.run()
