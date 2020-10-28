@@ -52,6 +52,7 @@ def get_read_reply():
 @reply_api.route('/write', methods=['POST'])
 @login_required
 @allowed_access
+@user_have_write_right
 def post_write_reply():
     written_info = request.json
     if written_info is None:
@@ -87,24 +88,27 @@ def post_write_reply():
         new_reply.parentReplyID = written_info['parentID']
     db.session.add(new_reply)
     db.session.commit()
+    to = 'ciiXNeQ8RQK-Ty7mUHqTcY:APA91bFDdt9ZvXSJfDE1pWaMAQ0PZ__qbaVb9h1VaQI-gelRGNu1xSXdLtOJaoguI3hvamS7k0CMVyEGKNS1eIjAG_C_ccltvMw-aeweMoqoG0vyVZ59oaM8deMD2Ss9ByzrPi6MEPSb'
+    send_push_alarm(to)
     return response_with_code('<success>')
 
 @reply_api.route('/delete', methods=['GET'])
 @login_required
 @allowed_access
+@user_have_write_right
 def get_delete_reply():
-    communityType = int(request.args.get('communityType'))
-    replyID = int(request.args.get('replyID'))
+    written_info = {key:int(val[0]) for key, val in dict(request.args).items()}
+    print(written_info)
     reply= reply_type[written_info['communityType']] if written_info['isRereply'] == 0 \
         else reReply_type[written_info['communityType']]
     # query db and change to dict
-    query_result = reply.query.filter_by(replyID=replyID, communityID=written_info['communityID']).first()
+    query_result = reply.query.filter_by(replyID=written_info['replyID'], communityID=written_info['communityID']).first()
     if not query_result:
         return response_with_code('<fail>:2:no rely')
     # check authority replys
     if query_result.userID != session['user_id']:
         return response_with_code('<fail>:2:no right to delete')
-    # increase reply number for article
+    # decrease reply number for article
     article = com_type[written_info['communityType']]
     target_article = article.query.filter_by(articleID=written_info['articleID']).first()
     target_article.reply -= 1

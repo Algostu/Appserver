@@ -20,7 +20,8 @@ def get_read_cafeMenu():
     dict_row = convert_to_dict(result)
     dict_row.pop('schoolID')
     dict_row.pop('regionID')
-    dict_row.update(json.loads(dict_row.pop('cafeMenu')))
+    dict_row['curMonth'] = json.loads(dict_row.pop('curCafeMenu'))
+    dict_row['nextMonth'] = json.loads(dict_row.pop('nextCafeMenu'))
     dict_row['version'] = str(dict_row['version']).split(' ')[0]
-    print(dict_row)
+    # print(dict_row['nextMonth'])
     return response_with_code('<success>', dict_row)

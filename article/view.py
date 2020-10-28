@@ -9,10 +9,56 @@ from main.model import *
 article_api = Blueprint('article', __name__, url_prefix='/article')
 
 com_type = [ArticleAll, ArticleRegion, ArticleSchool]
+com_type_name = ["ArticleAll", "ArticleRegion", "ArticleSchool"]
 heart_type = [LikeToAll, LikeToRegion, LikeToSchool]
 allowed_ids = ['allowed_all_ids', 'allowed_region_ids', 'allowed_school_ids']
 
 time_format = "%04d/%02d/%02d %02d:%02d:%02d"
+
+@article_api.route('/report', methods=['GET'])
+@login_required
+@allowed_access
+@user_have_write_right
+def get_report_article():
+    communityType = int(request.args.get('communityType'))
+    articleID = int(request.args.get('articleID'))
+    communityID = int(request.args.get('communityID'))
+    community_type_name = com_type_name[communityType]
+    article = com_type[communityType]
+    # query db and change to dict
+    query_result = article.query.filter_by(articleID=articleID, communityID=communityID).first()
+    report_query = ArticleReport.query.filter_by(articleID=articleID, communityID=communityID).first()
+    if not query_result:
+        # delete report item if article has been already deleted.
+        if not report_query:
+            db.session.delete(query_result)
+            db.session.commit()
+        return response_with_code("<fail>:2:no article")
+    dict_value = convert_to_dict(query_result)
+    # if article does not reported before
+    if not report_query:
+        reportUser = [session['user_id']]
+        report = ArticleReport(articleID = dict_value['articleID'], communityID = dict_value['communityID'], articleType = community_type_name,
+        userID = dict_value['userID'], title = dict_value['title'], content = dict_value['content'], reportNum = 1, reportUser = json.dumps(reportUser))
+        db.session.add(report)
+        db.session.commit()
+    # if article reported before
+    else:
+        # check if user has already reported this article before
+        report_user_ids = json.loads(report_query.reportUser)
+        if session['user_id'] in report_user_ids:
+            return response_with_code("<fail>:2:Already Reported")
+        # add report user id
+        report_user_ids.append(session['user_id'])
+        report_query.reportNum += 1
+        report_query.reportUser = json.dumps(report_user_ids)
+        # if reported by more than 5 person, it will be deleted.
+        if report_query.reportNum >= 2:
+            db.session.delete(report_query)
+            db.session.delete(query_result)
+        db.session.commit()
+    #  increase view number
+    return response_with_code("<success>")
 
 @article_api.route('/read', methods=['GET'])
 @login_required
@@ -24,6 +70,7 @@ def get_read_article():
     article = com_type[communityType]
     heart = heart_type[communityType]
     heart_pushed = 0
+    reported = 0
     # query db and change to dict
     query_result = article.query.filter_by(articleID=articleID, communityID=communityID).first()
     if not query_result:
@@ -31,10 +78,15 @@ def get_read_article():
     query_result2 = heart.query.filter_by(articleID=articleID, userID=session['user_id']).first()
     if query_result2:
         heart_pushed = 1
+    query_result3 = ArticleReport.query.filter_by(articleID=articleID, communityID=communityID).first()
+    if query_result3:
+        if session['user_id'] in json.loads(query_result3.reportUser):
+            reported = 1
     target_article = convert_to_dict(query_result)
     writer = target_article.pop('userID')
     target_article['edit'] = 1 if writer == session['user_id'] else 0
     target_article['heartPushed'] = heart_pushed
+    target_article['reported'] = reported
     #  increase view number
     query_result.viewNumber += 1
     db.session.commit()

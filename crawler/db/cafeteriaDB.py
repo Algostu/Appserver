@@ -47,14 +47,18 @@ class cafeDB(baseDB):
                 # case 3 : if there is same named school in same region (1개 누락)
                 # Process next Month
                 nextMonthmenus = total_info['nextMonth'][region][schoolName] if len(total_info['nextMonth']) > 0 else []
-                menu = {'curMonth':menus, 'nextMonth':nextMonthmenus}
                 existing_row = CafeteriaInfo.query.filter_by(schoolID=school_infos.schoolID).first()
                 if existing_row:
-                    existing_row.cafeMenu = json.dumps(menu)
+                    existing_row.curCafeMenu = json.dumps(menus)
+                    existing_row.nextCafeMenu = json.dumps(nextMonthmenus)
+                    existing_row.version = self.version
                     db.session.commit()
                 else:
-                    cafe = CafeteriaInfo(schoolID=school_infos.schoolID, regionID=regionID, version=self.version, cafeMenu=json.dumps(menu, indent=4, ensure_ascii=False))
+                    cafe = CafeteriaInfo(schoolID=school_infos.schoolID, regionID=regionID, version=self.version)
+                    cafe.curCafeMenu=json.dumps(menus, indent=4, ensure_ascii=False)
+                    cafe.nextCafeMenu=json.dumps(nextMonthmenus, indent=4, ensure_ascii=False)
                     db.session.add(cafe)
+                    db.session.commit()
         db.session.commit()
 
     def test_cafeinfo(self):

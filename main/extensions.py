@@ -18,7 +18,12 @@ import time
 import string
 import json
 import random
+import requests
 
+import io
+from base64 import encodebytes
+from PIL import Image
+# from flask import jsonify
 
 security = Security()
 admin = Admin(base_template='my_master.html', template_mode='bootstrap3',)
@@ -28,6 +33,13 @@ sess = Session()
 mail = Mail()
 
 current_milli_time = lambda: int(round(time.time() * 1000)) % 100000
+
+def get_response_image(image_path):
+    pil_img = Image.open(image_path, mode='r') # reads the PIL image
+    byte_arr = io.BytesIO()
+    pil_img.save(byte_arr, format='PNG') # convert the PIL image to byte array
+    encoded_img = encodebytes(byte_arr.getvalue()).decode('ascii') # encode as base64
+    return encoded_img
 
 def response_with_code(status, body=None):
     return json.dumps({'status':status, 'body':body})
@@ -98,3 +110,22 @@ def convert_to_dict(query_result):
     if written_time:
         dict_result['writtenTime'] = str(written_time)
     return dict_result
+
+def send_push_alarm(to):
+    headers = {
+        'Authorization': 'key=AAAAfktu114:APA91bFKJ0O4YF28d_IgbGJRmf6iyjSMdYEheVu_zLfvlNKi-vHBSeKuSlqEP-8JnWGG1e0s17-Ask5wKoFMOZLA11jXaS8hJLuGPA-pSQt5d_ylmHJfv8YlKzQ8dsjq7kOAIpv2bpCz'
+    }
+    body = {
+        'to':to,
+        'priority':'high',
+        'data':{
+            "score": "5x1",
+            "time": "09:32",
+            'title':'reply notification',
+            'message':'hakyul write to your article',
+            'test':'test'
+        },
+        "direct_book_ok" : True
+    }
+    r= requests.post('https://fcm.googleapis.com/fcm/send', headers=headers, data=body)
+    print(r)

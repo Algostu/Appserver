@@ -31,8 +31,10 @@ class cafeteriaCrawler(crawler):
     def parse_menu(self, menu_data):
         menus = []
         for raw_menu in menu_data['list']:
-            if "dd_date" not in raw_menu or "lunch" not in raw_menu:
+            if "dd_date" not in raw_menu:
                 continue
+            if "lunch" not in raw_menu:
+                raw_menu['lunch'] = ''
 
             menus.append({
                 'date' : raw_menu['dd_date'].strip(),

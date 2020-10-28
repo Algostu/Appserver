@@ -111,6 +111,19 @@ class CommunitySchool(db.Model):
 
     school_info = db.relationship('SchoolInfo', primaryjoin='CommunitySchool.schoolID == SchoolInfo.schoolID', backref='community_schools')
 
+class ArticleReport(db.Model):
+    __tablename__ = 'article_report'
+
+    reportID = db.Column(db.Integer, primary_key=True)
+    articleID = db.Column(db.Integer)
+    communityID = db.Column(db.Integer)
+    articleType = db.Column(db.String(50, 'utf8_unicode_ci'))
+    userID = db.Column(db.Integer)
+    title = db.Column(db.String(50, 'utf8_unicode_ci'))
+    content = db.Column(db.String(5000, 'utf8_unicode_ci'))
+    reportNum = db.Column(db.Integer)
+    reportUser = db.Column(db.String(50, 'utf8_unicode_ci'))
+
 class ArticleAll(db.Model):
     __tablename__ = 'article_all'
 
@@ -206,7 +219,8 @@ class CafeteriaInfo(db.Model):
     schoolID = db.Column(db.Integer, primary_key=True)
     regionID = db.Column(db.ForeignKey('region_info.regionID', ondelete='CASCADE'), index=True)
     version = db.Column(db.DateTime)
-    cafeMenu = db.Column(db.String(7000, 'utf8_unicode_ci'))
+    curCafeMenu = db.Column(db.String(7000, 'utf8_unicode_ci'))
+    nextCafeMenu = db.Column(db.String(7000, 'utf8_unicode_ci'))
 
 class ContestInfo(db.Model):
     __tablename__ = 'contest_info'
