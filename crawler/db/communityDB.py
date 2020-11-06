@@ -1,4 +1,4 @@
-import os, sys, json, time
+import os, sys, json, time, datetime
 import hashlib
 from tqdm import tqdm
 
@@ -24,6 +24,17 @@ class communityDB(baseDB):
 
             community_name = self.all_communityList[id]
             community = CommunityAll(communityID=id, communityName=community_name)
+            db.session.add(community)
+        db.session.commit()
+
+    def register_univ_community(self):
+        for univ in UnivInfo.query.all():
+            id = univ.univID * 10
+            if CommunityAll.query.filter_by(communityID=id).first():
+                continue
+            community = CommunityAll(communityID=id+1, communityName=univ.univName+"커뮤니티")
+            db.session.add(community)
+            community = CommunityAll(communityID=id, communityName=univ.univName+"뉴스")
             db.session.add(community)
         db.session.commit()
 
@@ -73,7 +84,44 @@ class communityDB(baseDB):
                 db.session.add(community)
         db.session.commit()
 
+    def get_cur_date(self):
+        time_format = "%04d/%02d/%02d %02d:%02d:%02d"
+        now = time.localtime()
+        written_time = time_format % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
+        return written_time
+
+    def init_community(self):
+        try:
+            num_rows_deleted = db.session.query(ArticleAll).delete()
+            num_rows_deleted = db.session.query(ArticleSchool).delete()
+            num_rows_deleted = db.session.query(ArticleRegion).delete()
+            db.session.commit()
+        except:
+            db.session.rollback()
+
+        for community in CommunityAll.query.all():
+            article = ArticleAll(communityID=community.communityID, userID=1479750676, nickName="삐약이",
+            title="환영합니다", content="게시판에 오신것을 환영합니다. 첫글을 남겨 주세요.",
+            viewNumber=0, reply=0, heart=5, writtenTime=self.get_cur_date())
+            db.session.add(article)
+
+        for community in CommunityRegion.query.all():
+            article = ArticleRegion(communityID=community.communityID, regionID=community.regionID, userID=1479750676, nickName="삐약이",
+            title="환영합니다", content="게시판에 오신것을 환영합니다. 첫글을 남겨 주세요.",
+            viewNumber=0, reply=0, heart=5, writtenTime=self.get_cur_date())
+            db.session.add(article)
+
+        for community in CommunitySchool.query.all():
+            article = ArticleSchool(communityID=community.communityID, schoolID=community.schoolID, userID=1479750676, nickName="삐약이",
+            title="환영합니다", content="게시판에 오신것을 환영합니다. 첫글을 남겨 주세요.",
+            viewNumber=0, reply=0, heart=5, writtenTime=self.get_cur_date())
+            db.session.add(article)
+        db.session.commit()
+
+
     def run(self):
         self.register_all_communityList()
         self.register_region_communityList()
         self.register_school_communityList()
+        self.register_univ_community()
+        self.init_community()

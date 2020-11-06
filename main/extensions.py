@@ -98,6 +98,14 @@ def allowed_access(f):
         json_data = request.json
         id = int(json_data['communityID']) if json_data else int(request.args.get('communityID'))
         ids = session.get('allowed_ids')
+        communityType = request.args.get('communityType')
+        if not communityType:
+            communityType = json_data['communityType']
+        else:
+            communityType = int(communityType)
+
+        if communityType == 0:
+            return f(*args, **kwargs)
         if id not in ids:
             return response_with_code("<fail>:2:access denied")
         return f(*args, **kwargs)
@@ -111,21 +119,22 @@ def convert_to_dict(query_result):
         dict_result['writtenTime'] = str(written_time)
     return dict_result
 
-def send_push_alarm(to):
+def send_push_alarm(to, title, body):
     headers = {
+        'Content-Type' : 'application/json',
         'Authorization': 'key=AAAAfktu114:APA91bFKJ0O4YF28d_IgbGJRmf6iyjSMdYEheVu_zLfvlNKi-vHBSeKuSlqEP-8JnWGG1e0s17-Ask5wKoFMOZLA11jXaS8hJLuGPA-pSQt5d_ylmHJfv8YlKzQ8dsjq7kOAIpv2bpCz'
     }
     body = {
         'to':to,
         'priority':'high',
         'data':{
-            "score": "5x1",
-            "time": "09:32",
-            'title':'reply notification',
-            'message':'hakyul write to your article',
-            'test':'test'
+            'title':title,
+            'message':body
         },
-        "direct_book_ok" : True
+        'notification':{
+            'title':title,
+            'body':body
+        }
     }
-    r= requests.post('https://fcm.googleapis.com/fcm/send', headers=headers, data=body)
+    r= requests.post('https://fcm.googleapis.com/fcm/send', headers=headers, data=json.dumps(body))
     print(r)

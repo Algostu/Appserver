@@ -2,6 +2,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.inspection import inspect
 from sqlalchemy.schema import FetchedValue
+from sqlalchemy.orm import backref
 from flask_security import Security, SQLAlchemyUserDatastore, \
     UserMixin, RoleMixin
 
@@ -69,8 +70,8 @@ class LikeToAll(db.Model):
     userID = db.Column(db.ForeignKey('user_info.userID', ondelete='CASCADE'), index=True)
     articleID = db.Column(db.ForeignKey('article_all.articleID', ondelete='CASCADE'), index=True)
 
-    user_info = db.relationship('UserInfo', primaryjoin='LikeToAll.userID == UserInfo.userID', backref='like_to_alls')
-    article = db.relationship('ArticleAll', primaryjoin='LikeToAll.articleID == ArticleAll.articleID', backref='like_to_alls')
+    user_info = db.relationship('UserInfo', primaryjoin='LikeToAll.userID == UserInfo.userID', backref=backref('like_to_alls', cascade="all,delete"))
+    article = db.relationship('ArticleAll', primaryjoin='LikeToAll.articleID == ArticleAll.articleID', backref=backref('like_to_alls', cascade="all,delete"))
 
 class LikeToSchool(db.Model):
     __tablename__ = 'like_to_school'
@@ -79,8 +80,8 @@ class LikeToSchool(db.Model):
     userID = db.Column(db.ForeignKey('user_info.userID', ondelete='CASCADE'), index=True)
     articleID = db.Column(db.ForeignKey('article_school.articleID', ondelete='CASCADE'), index=True)
 
-    user_info = db.relationship('UserInfo', primaryjoin='LikeToSchool.userID == UserInfo.userID', backref='like_to_schools')
-    article = db.relationship('ArticleSchool', primaryjoin='LikeToSchool.articleID == ArticleSchool.articleID', backref='like_to_schools')
+    user_info = db.relationship('UserInfo', primaryjoin='LikeToSchool.userID == UserInfo.userID', backref=backref('like_to_schools', cascade="all,delete"))
+    article = db.relationship('ArticleSchool', primaryjoin='LikeToSchool.articleID == ArticleSchool.articleID', backref=backref('like_to_schools', cascade="all,delete"))
 
 class LikeToRegion(db.Model):
     __tablename__ = 'like_to_region'
@@ -89,8 +90,8 @@ class LikeToRegion(db.Model):
     userID = db.Column(db.ForeignKey('user_info.userID', ondelete='CASCADE'), index=True)
     articleID = db.Column(db.ForeignKey('article_region.articleID', ondelete='CASCADE'), index=True)
 
-    user_info = db.relationship('UserInfo', primaryjoin='LikeToRegion.userID == UserInfo.userID', backref='like_to_regions')
-    article = db.relationship('ArticleRegion', primaryjoin='LikeToRegion.articleID == ArticleRegion.articleID', backref='like_to_regions')
+    user_info = db.relationship('UserInfo', primaryjoin='LikeToRegion.userID == UserInfo.userID', backref=backref('like_to_regions', cascade="all,delete"))
+    article = db.relationship('ArticleRegion', primaryjoin='LikeToRegion.articleID == ArticleRegion.articleID', backref=backref('like_to_regions', cascade="all,delete"))
 
 
 class CommunityRegion(db.Model):
@@ -100,7 +101,7 @@ class CommunityRegion(db.Model):
     regionID = db.Column(db.ForeignKey('region_info.regionID', ondelete='CASCADE'), index=True)
     communityName = db.Column(db.String(20, 'utf8_unicode_ci'))
 
-    region_info = db.relationship('RegionInfo', primaryjoin='CommunityRegion.regionID == RegionInfo.regionID', backref='community_regions')
+    region_info = db.relationship('RegionInfo', primaryjoin='CommunityRegion.regionID == RegionInfo.regionID', backref=backref('community_regions', cascade="all,delete"))
 
 class CommunitySchool(db.Model):
     __tablename__ = 'community_school'
@@ -109,7 +110,7 @@ class CommunitySchool(db.Model):
     schoolID = db.Column(db.ForeignKey('school_info.schoolID', ondelete='CASCADE'), nullable=False, index=True)
     communityName = db.Column(db.String(20, 'utf8_unicode_ci'))
 
-    school_info = db.relationship('SchoolInfo', primaryjoin='CommunitySchool.schoolID == SchoolInfo.schoolID', backref='community_schools')
+    school_info = db.relationship('SchoolInfo', primaryjoin='CommunitySchool.schoolID == SchoolInfo.schoolID', backref=backref('community_schools', cascade="all,delete"))
 
 class ArticleReport(db.Model):
     __tablename__ = 'article_report'
@@ -123,6 +124,23 @@ class ArticleReport(db.Model):
     content = db.Column(db.String(5000, 'utf8_unicode_ci'))
     reportNum = db.Column(db.Integer)
     reportUser = db.Column(db.String(50, 'utf8_unicode_ci'))
+
+class LiveShow(db.Model):
+    __tablename__ = 'live_show'
+
+    liveShowID = db.Column(db.Integer, primary_key=True)
+    univID = db.Column(db.ForeignKey('univ_info.univID', ondelete='CASCADE'), index=True)
+    userID = db.Column(db.ForeignKey('user_info.userID', ondelete='CASCADE'), index=True)
+    univTitle = db.Column(db.String(50, 'utf8_unicode_ci'))
+    major = db.Column(db.String(50, 'utf8_unicode_ci'))
+    title = db.Column(db.String(50, 'utf8_unicode_ci'))
+    content = db.Column(db.String(5000, 'utf8_unicode_ci'))
+    heart = db.Column(db.Integer, server_default=FetchedValue())
+    writtenTime = db.Column(db.DateTime)
+
+    univ_info = db.relationship('UnivInfo', primaryjoin='UnivInfo.univID == LiveShow.univID', backref=backref('live_shows', cascade="all,delete"))
+    user_info = db.relationship('UserInfo', primaryjoin='LiveShow.userID == UserInfo.userID', backref=backref('live_shows', cascade="all,delete"))
+
 
 class ArticleAll(db.Model):
     __tablename__ = 'article_all'
@@ -138,8 +156,8 @@ class ArticleAll(db.Model):
     heart = db.Column(db.Integer, server_default=FetchedValue())
     writtenTime = db.Column(db.DateTime)
 
-    community = db.relationship('CommunityAll', primaryjoin='ArticleAll.communityID == CommunityAll.communityID', backref='article_alls')
-    user_info = db.relationship('UserInfo', primaryjoin='ArticleAll.userID == UserInfo.userID', backref='article_alls')
+    community = db.relationship('CommunityAll', primaryjoin='ArticleAll.communityID == CommunityAll.communityID', backref=backref('article_alls', cascade="all,delete"))
+    user_info = db.relationship('UserInfo', primaryjoin='ArticleAll.userID == UserInfo.userID', backref=backref('article_alls', cascade="all,delete"))
 
 class ArticleRegion(db.Model):
     __tablename__ = 'article_region'
@@ -156,9 +174,9 @@ class ArticleRegion(db.Model):
     heart = db.Column(db.Integer, server_default=FetchedValue())
     writtenTime = db.Column(db.DateTime)
 
-    community = db.relationship('CommunityRegion', primaryjoin='ArticleRegion.communityID == CommunityRegion.communityID', backref='article_regions')
-    user_info = db.relationship('UserInfo', primaryjoin='ArticleRegion.userID == UserInfo.userID', backref='article_regions')
-    region_info = db.relationship('RegionInfo', primaryjoin='ArticleRegion.regionID == RegionInfo.regionID', backref='article_regions')
+    community = db.relationship('CommunityRegion', primaryjoin='ArticleRegion.communityID == CommunityRegion.communityID', backref=backref('article_regions', cascade="all,delete"))
+    user_info = db.relationship('UserInfo', primaryjoin='ArticleRegion.userID == UserInfo.userID', backref=backref('article_regions', cascade="all,delete"))
+    region_info = db.relationship('RegionInfo', primaryjoin='ArticleRegion.regionID == RegionInfo.regionID', backref=backref('article_regions', cascade="all,delete"))
 
 
 class ArticleSchool(db.Model):
@@ -176,9 +194,9 @@ class ArticleSchool(db.Model):
     heart = db.Column(db.Integer, server_default=FetchedValue())
     writtenTime = db.Column(db.DateTime)
 
-    community = db.relationship('CommunitySchool', primaryjoin='ArticleSchool.communityID == CommunitySchool.communityID', backref='articles')
-    user_info = db.relationship('UserInfo', primaryjoin='ArticleSchool.userID == UserInfo.userID', backref='article_schools')
-    school_info = db.relationship('SchoolInfo', primaryjoin='ArticleSchool.schoolID == SchoolInfo.schoolID', backref='user_info_schools')
+    community = db.relationship('CommunitySchool', primaryjoin='ArticleSchool.communityID == CommunitySchool.communityID', backref=backref('articles', cascade="all,delete"))
+    user_info = db.relationship('UserInfo', primaryjoin='ArticleSchool.userID == UserInfo.userID', backref=backref('article_schools', cascade="all,delete"))
+    school_info = db.relationship('SchoolInfo', primaryjoin='ArticleSchool.schoolID == SchoolInfo.schoolID', backref=backref('user_info_schools', cascade="all,delete"))
 
 class RegionInfo(db.Model):
     __tablename__ = 'region_info'
@@ -200,7 +218,7 @@ class SchoolInfo(db.Model):
     contact = db.Column(db.String(20, 'utf8_unicode_ci'))
     homePage = db.Column(db.String(1000, 'utf8_unicode_ci'))
 
-    region_info = db.relationship('RegionInfo', primaryjoin='SchoolInfo.regionID == RegionInfo.regionID', backref='school_infos')
+    region_info = db.relationship('RegionInfo', primaryjoin='SchoolInfo.regionID == RegionInfo.regionID', backref=backref('school_infos', cascade="all,delete"))
 
 
 class UnivInfo(db.Model):
@@ -262,9 +280,11 @@ class UserInfo(db.Model):
     gender = db.Column(db.Integer, nullable=False)
     grade = db.Column(db.Integer, nullable=False)
     nickName = db.Column(db.String(20, 'utf8_unicode_ci'), nullable=False)
+    banned = db.Column(db.Integer)
+    fcmToken = db.Column(db.String(200, 'utf8_unicode_ci'), nullable=False)
 
-    school_info = db.relationship('SchoolInfo', primaryjoin='UserInfo.schoolID == SchoolInfo.schoolID', backref='user_infos')
-    region_info = db.relationship('RegionInfo', primaryjoin='UserInfo.regionID == RegionInfo.regionID', backref='user_infos')
+    school_info = db.relationship('SchoolInfo', primaryjoin='UserInfo.schoolID == SchoolInfo.schoolID', backref=backref('user_infos', cascade="all,delete"))
+    region_info = db.relationship('RegionInfo', primaryjoin='UserInfo.regionID == RegionInfo.regionID', backref=backref('user_infos', cascade="all,delete"))
 
 
 class ReplyAll(db.Model):
@@ -278,9 +298,9 @@ class ReplyAll(db.Model):
     content = db.Column(db.String(5000, 'utf8_unicode_ci'))
     writtenTime = db.Column(db.DateTime)
 
-    article = db.relationship('ArticleAll', primaryjoin='ReplyAll.articleID == ArticleAll.articleID', backref='reply_alls')
-    community = db.relationship('CommunityAll', primaryjoin='ReplyAll.communityID == CommunityAll.communityID', backref='reply_alls')
-    user_info = db.relationship('UserInfo', primaryjoin='ReplyAll.userID == UserInfo.userID', backref='reply_alls')
+    article = db.relationship('ArticleAll', primaryjoin='ReplyAll.articleID == ArticleAll.articleID', backref=backref('reply_alls', cascade="all,delete"))
+    community = db.relationship('CommunityAll', primaryjoin='ReplyAll.communityID == CommunityAll.communityID', backref=backref('reply_alls', cascade="all,delete"))
+    user_info = db.relationship('UserInfo', primaryjoin='ReplyAll.userID == UserInfo.userID', backref=backref('reply_alls', cascade="all,delete"))
 
 class ReplyRegion(db.Model):
     __tablename__ = 'reply_region'
@@ -293,9 +313,9 @@ class ReplyRegion(db.Model):
     content = db.Column(db.String(5000, 'utf8_unicode_ci'))
     writtenTime = db.Column(db.DateTime)
 
-    article = db.relationship('ArticleRegion', primaryjoin='ReplyRegion.articleID == ArticleRegion.articleID', backref='reply_regions')
-    community = db.relationship('CommunityRegion', primaryjoin='ReplyRegion.communityID == CommunityRegion.communityID', backref='reply_regions')
-    user_info = db.relationship('UserInfo', primaryjoin='ReplyRegion.userID == UserInfo.userID', backref='reply_regions')
+    article = db.relationship('ArticleRegion', primaryjoin='ReplyRegion.articleID == ArticleRegion.articleID', backref=backref('reply_regions', cascade="all,delete"))
+    community = db.relationship('CommunityRegion', primaryjoin='ReplyRegion.communityID == CommunityRegion.communityID', backref=backref('reply_regions', cascade="all,delete"))
+    user_info = db.relationship('UserInfo', primaryjoin='ReplyRegion.userID == UserInfo.userID', backref=backref('reply_regions', cascade="all,delete"))
 
 
 class ReplySchool(db.Model):
@@ -309,9 +329,9 @@ class ReplySchool(db.Model):
     content = db.Column(db.String(5000, 'utf8_unicode_ci'))
     writtenTime = db.Column(db.DateTime)
 
-    article = db.relationship('ArticleSchool', primaryjoin='ReplySchool.articleID == ArticleSchool.articleID', backref='reply_schools')
-    community = db.relationship('CommunitySchool', primaryjoin='ReplySchool.communityID == CommunitySchool.communityID', backref='reply_schools')
-    user_info = db.relationship('UserInfo', primaryjoin='ReplySchool.userID == UserInfo.userID', backref='reply_schools')
+    article = db.relationship('ArticleSchool', primaryjoin='ReplySchool.articleID == ArticleSchool.articleID', backref=backref('reply_schools', cascade="all,delete"))
+    community = db.relationship('CommunitySchool', primaryjoin='ReplySchool.communityID == CommunitySchool.communityID', backref=backref('reply_schools', cascade="all,delete"))
+    user_info = db.relationship('UserInfo', primaryjoin='ReplySchool.userID == UserInfo.userID', backref=backref('reply_schools', cascade="all,delete"))
 
 
 class ReReplySchool(db.Model):
@@ -326,10 +346,10 @@ class ReReplySchool(db.Model):
     content = db.Column(db.String(5000, 'utf8_unicode_ci'))
     writtenTime = db.Column(db.DateTime)
 
-    article = db.relationship('ArticleSchool', primaryjoin='ReReplySchool.articleID == ArticleSchool.articleID', backref='rereplie_schools')
-    community = db.relationship('CommunitySchool', primaryjoin='ReReplySchool.communityID == CommunitySchool.communityID', backref='rereplie_schools')
-    user_info = db.relationship('UserInfo', primaryjoin='ReReplySchool.userID == UserInfo.userID', backref='rereplie_schools')
-    reply = db.relationship('ReplySchool', primaryjoin='ReReplySchool.parentReplyID == ReplySchool.replyID', backref='rereplie_schools')
+    article = db.relationship('ArticleSchool', primaryjoin='ReReplySchool.articleID == ArticleSchool.articleID', backref=backref('rereplie_schools', cascade="all,delete"))
+    community = db.relationship('CommunitySchool', primaryjoin='ReReplySchool.communityID == CommunitySchool.communityID', backref=backref('rereplie_schools', cascade="all,delete"))
+    user_info = db.relationship('UserInfo', primaryjoin='ReReplySchool.userID == UserInfo.userID', backref=backref('rereplie_schools', cascade="all,delete"))
+    reply = db.relationship('ReplySchool', primaryjoin='ReReplySchool.parentReplyID == ReplySchool.replyID', backref=backref('rereplie_schools', cascade="all,delete"))
 
 
 class ReReplyRegion(db.Model):
@@ -344,10 +364,10 @@ class ReReplyRegion(db.Model):
     content = db.Column(db.String(5000, 'utf8_unicode_ci'))
     writtenTime = db.Column(db.DateTime)
 
-    article = db.relationship('ArticleRegion', primaryjoin='ReReplyRegion.articleID == ArticleRegion.articleID', backref='rereplie_regions')
-    community = db.relationship('CommunityRegion', primaryjoin='ReReplyRegion.communityID == CommunityRegion.communityID', backref='rereplie_regions')
-    user_info = db.relationship('UserInfo', primaryjoin='ReReplyRegion.userID == UserInfo.userID', backref='rereplie_regions')
-    reply = db.relationship('ReplyRegion', primaryjoin='ReReplyRegion.parentReplyID == ReplyRegion.replyID', backref='rereplie_regions')
+    article = db.relationship('ArticleRegion', primaryjoin='ReReplyRegion.articleID == ArticleRegion.articleID', backref=backref('rereplie_regions', cascade="all,delete"))
+    community = db.relationship('CommunityRegion', primaryjoin='ReReplyRegion.communityID == CommunityRegion.communityID', backref=backref('rereplie_regions', cascade="all,delete"))
+    user_info = db.relationship('UserInfo', primaryjoin='ReReplyRegion.userID == UserInfo.userID', backref=backref('rereplie_regions', cascade="all,delete"))
+    reply = db.relationship('ReplyRegion', primaryjoin='ReReplyRegion.parentReplyID == ReplyRegion.replyID', backref=backref('rereplie_regions', cascade="all,delete"))
 
 class ReReplyAll(db.Model):
     __tablename__ = 'rereply_all'
@@ -361,7 +381,7 @@ class ReReplyAll(db.Model):
     content = db.Column(db.String(5000, 'utf8_unicode_ci'))
     writtenTime = db.Column(db.DateTime)
 
-    article = db.relationship('ArticleAll', primaryjoin='ReReplyAll.articleID == ArticleAll.articleID', backref='rereplie_alls')
-    community = db.relationship('CommunityAll', primaryjoin='ReReplyAll.communityID == CommunityAll.communityID', backref='rereplie_alls')
-    user_info = db.relationship('UserInfo', primaryjoin='ReReplyAll.userID == UserInfo.userID', backref='rereplie_alls')
-    reply = db.relationship('ReplyAll', primaryjoin='ReReplyAll.parentReplyID == ReplyAll.replyID', backref='rereplie_alls')
+    article = db.relationship('ArticleAll', primaryjoin='ReReplyAll.articleID == ArticleAll.articleID', backref=backref('rereplie_alls', cascade="all,delete"))
+    community = db.relationship('CommunityAll', primaryjoin='ReReplyAll.communityID == CommunityAll.communityID', backref=backref('rereplie_alls', cascade="all,delete"))
+    user_info = db.relationship('UserInfo', primaryjoin='ReReplyAll.userID == UserInfo.userID', backref=backref('rereplie_alls', cascade="all,delete"))
+    reply = db.relationship('ReplyAll', primaryjoin='ReReplyAll.parentReplyID == ReplyAll.replyID', backref=backref('rereplie_alls', cascade="all,delete"))

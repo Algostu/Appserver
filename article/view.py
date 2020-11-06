@@ -33,7 +33,7 @@ def get_report_article():
         if not report_query:
             db.session.delete(query_result)
             db.session.commit()
-        return response_with_code("<fail>:2:no article")
+        return response_with_code("<fail>:3:no article")
     dict_value = convert_to_dict(query_result)
     # if article does not reported before
     if not report_query:
@@ -53,9 +53,23 @@ def get_report_article():
         report_query.reportNum += 1
         report_query.reportUser = json.dumps(report_user_ids)
         # if reported by more than 5 person, it will be deleted.
-        if report_query.reportNum >= 2:
+        if report_query.reportNum >= 5:
+            user = UserInfo.query.filter_by(userID = report_query.userID).first()
             db.session.delete(report_query)
             db.session.delete(query_result)
+            if not user:
+                db.session.commit()
+                return response_with_code("<success>")
+
+            if user.banned:
+                user.banned += 1
+            else:
+                user.banned = 1
+            # if user is reported by more than 3 times
+            if user.banned > 2:
+                signout_user = SignOutUser(userID=user.userID, writtenTime=get_cur_date())
+                db.session.add(signout_user)
+                db.session.delete(user)
         db.session.commit()
     #  increase view number
     return response_with_code("<success>")
@@ -74,7 +88,7 @@ def get_read_article():
     # query db and change to dict
     query_result = article.query.filter_by(articleID=articleID, communityID=communityID).first()
     if not query_result:
-        return response_with_code("<fail>:2:no article")
+        return response_with_code("<fail>:3:no article")
     query_result2 = heart.query.filter_by(articleID=articleID, userID=session['user_id']).first()
     if query_result2:
         heart_pushed = 1

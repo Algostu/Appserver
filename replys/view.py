@@ -62,6 +62,7 @@ def post_write_reply():
     target_article = article.query.filter_by(articleID=written_info['articleID'], communityID=written_info['communityID']).first()
     if target_article == None:
         return response_with_code('<fail>:2:no article ')
+    writter_id = target_article.userID
     target_article.reply += 1
     # get time and nickName info
     now = time.localtime()
@@ -88,8 +89,13 @@ def post_write_reply():
         new_reply.parentReplyID = written_info['parentID']
     db.session.add(new_reply)
     db.session.commit()
-    to = 'ciiXNeQ8RQK-Ty7mUHqTcY:APA91bFDdt9ZvXSJfDE1pWaMAQ0PZ__qbaVb9h1VaQI-gelRGNu1xSXdLtOJaoguI3hvamS7k0CMVyEGKNS1eIjAG_C_ccltvMw-aeweMoqoG0vyVZ59oaM8deMD2Ss9ByzrPi6MEPSb'
-    send_push_alarm(to)
+    # send push alarm
+    fcm_token = UserInfo.query.filter_by(userID = writter_id).first().fcmToken
+    if fcm_token:
+        title = "새로운 댓글이 달렸습니다."
+        body = {"communityType":written_info['communityType'], "articleID":written_info['articleID'], "communityID":written_info['communityID'],
+        "content":written_info['content'], "time":get_cur_date(), "type":0}
+        send_push_alarm(fcm_token, title, json.dumps(body))
     return response_with_code('<success>')
 
 @reply_api.route('/delete', methods=['GET'])

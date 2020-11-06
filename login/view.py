@@ -30,6 +30,7 @@ def get_signout():
         response_with_code('<Fail>:2:args needment fail')
     user = UserInfo.query.filter_by(userID = uid).first()
     signout_user = SignOutUser(userID=uid, writtenTime=get_cur_date())
+    session.clear()
     db.session.add(signout_user)
     db.session.delete(user)
     db.session.commit()
@@ -70,6 +71,7 @@ def get_login():
     # community id allowed for each user
     coms_all = [convert_to_dict(row) for row in CommunityAll.query.all()]
     community_all_ids = [com['communityID'] for com in coms_all]
+    community_all_ids = list(filter(lambda x : x < 100, community_all_ids))
     # convert query string to dict
     coms_school = []
     for row in CommunitySchool.query.filter_by(schoolID=result.schoolID).all():
@@ -93,6 +95,7 @@ def get_login():
     session['user_id'] = result.userID
     session['school_id'] = result.schoolID
     session['region_id'] = result.regionID
+    session['fcm_token'] = result.fcmToken
     session['allowed_all_ids'] = community_all_ids
     session['allowed_school_ids'] = community_school_ids
     session['allowed_region_ids'] = community_region_ids
@@ -105,6 +108,17 @@ def get_login():
 @login_api.route('/kakaoOauth', methods=['GET'])
 def post_oauth():
     print(request)
+
+@login_api.route('/registerFCM', methods=['GET'])
+@login_required
+def get_registerFCM():
+    fcm_token = request.args.get('token')
+    user = UserInfo.query.filter_by(userID = session['user_id']).first()
+    user.fcmToken = fcm_token
+    session['fcm_token'] = fcm_token
+    db.session.commit()
+    print(fcm_token)
+    return response_with_code("<success>")
 
 @login_api.route('/kakaoSignup', methods=['POST'])
 def post_signup():
@@ -121,9 +135,10 @@ def post_signup():
         return response_with_code('<Fail>:2:token expired')
     # check sender info is valid
     auth_user_info = get_request(user_access_token, '/v2/user/me')
-    if not auth_user_info or auth_user_info['kakao_account']['email'] != email or \
-    auth_user_info['kakao_account']['gender'] != gender or \
-    auth_user_info['kakao_account']['age_range'] != ageRange:
+    # if not auth_user_info or auth_user_info['kakao_account']['email'] != email or \
+    # auth_user_info['kakao_account']['gender'] != gender or \
+    # auth_user_info['kakao_account']['age_range'] != ageRange:
+    if not auth_user_info or auth_user_info['kakao_account']['email'] != email:
         return response_with_code('<Fail>:2:sender info is not valid')
     # check reasign in 30 days
     sign_user = SignOutUser.query.filter_by(userID = user_id).first()
@@ -144,6 +159,7 @@ def post_signup():
     if (sch_gen == 1 and gender != 'male') or (sch_gen == 2 and gender != 'female'):
         return response_with_code("<Fail>:2:user gender is not same as school")
     if str(ageRange) not in ['20~29', '14~19'] or str(ageRange) == '20~29' and int(grade) < 13:
+        print(str(ageRange))
         return response_with_code("<Fail>:2:user age don't go school any more")
     # check if user has already registered
     if UserInfo.query.filter_by(userID = user_id).first():
@@ -153,7 +169,7 @@ def post_signup():
     age = 1 if str(ageRange) == "14~19" else 2
     user = UserInfo(userID=int(user_id), schoolID=user_info['schoolID'], regionID=sch_reg,
     email=str(email), grade=int(grade), age=age, gender=gender, nickName=str(nickName),
-    studentName=user_name,schoolName=sch_name,regionName=reg_name,authorized=0,signupDate=get_cur_date())
+    studentName=user_name,schoolName=sch_name,regionName=reg_name,authorized=0,signupDate=get_cur_date(),fcmToken="")
     db.session.add(user)
     db.session.commit()
     return response_with_code('<success>')
