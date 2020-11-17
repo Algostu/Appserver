@@ -2,6 +2,21 @@ import openpyxl
 import json
 from tqdm import tqdm
 
+def combine_jsons():
+    file_name_base = "data/"
+    school_list = {}
+    for idx in range(17):
+        print("reading files " + file_name_base + str(idx) + '.json' + "....")
+        json_data = read_json(file_name_base + str(idx) + '.json')
+        for school in json_data:
+            I_CODE = school['ATPT_OFCDC_SC_CODE']
+            SC_CODE = school['SD_SCHUL_CODE']
+            SC_NAME = school['SCHUL_NM']
+            if len(I_CODE) != 0 and len(SC_CODE) != 0 and len(SC_NAME) != 0:
+                school_list[SC_NAME] = {'I_CODE':I_CODE, 'SC_CODE':SC_CODE}
+    save_json('data/school_code', school_list)
+
+
 def convert_to_json():
     # 엑셀파일 열기
     wb = openpyxl.load_workbook('data/고등학교 목록.xlsx')
@@ -95,4 +110,5 @@ def analyze():
 
 
 if __name__ == '__main__':
-    //analyze()
+    # analyze()
+    combine_jsons()
