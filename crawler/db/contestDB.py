@@ -26,9 +26,12 @@ class contestDB(baseDB):
 
     def register_contest(self):
         contest_infos = self.get_api()
+        try:
+            num_rows_deleted = db.session.query(ContestInfo).delete()
+            db.session.commit()
+        except:
+            db.session.rollback()
         for contest in tqdm(contest_infos):
-            if ContestInfo.query.filter_by(title=contest['title']).scalar():
-                continue
             new_contest = ContestInfo(title=contest['title'],imageUrl=contest['imageUrl'],content=contest['content'],area=contest['area'],sponsor=contest['sponsor'],
             start=contest['start'], end=contest['end'], prize=contest['prize'],firstPrize=contest['firstPrize'],homePage=contest['homePage'])
             db.session.add(new_contest)

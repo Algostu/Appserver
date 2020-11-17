@@ -129,6 +129,7 @@ def post_signup():
     email, gender, ageRange = escape(user_info['email']), escape(user_info['gender']), escape(user_info['ageRange'])
     nickName, grade = escape(user_info['nickName']), escape(user_info['grade'])
     user_name = str(escape(user_info['userName']))
+    classNum = user_info['classNum']
     # check sender access token is valid
     token_info = get_request(user_access_token, '/v1/user/access_token_info')
     if not token_info or str(user_id) != str(token_info['id']):
@@ -168,7 +169,7 @@ def post_signup():
     gender = 1 if str(gender) == 'male' else 2
     age = 1 if str(ageRange) == "14~19" else 2
     user = UserInfo(userID=int(user_id), schoolID=user_info['schoolID'], regionID=sch_reg,
-    email=str(email), grade=int(grade), age=age, gender=gender, nickName=str(nickName),
+    email=str(email), grade=int(grade), age=age, gender=gender, nickName=str(nickName), classNum=classNum,
     studentName=user_name,schoolName=sch_name,regionName=reg_name,authorized=0,signupDate=get_cur_date(),fcmToken="")
     db.session.add(user)
     db.session.commit()

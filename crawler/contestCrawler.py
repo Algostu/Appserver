@@ -13,8 +13,8 @@ class contestCrawler(crawler):
         self.category = {'분야':'area', '응모대상':'target', '주최/주관':'sponsor', '접수기간' : 'dates', '총 상금':'prize', '1등 상금':'firstPrize', '홈페이지':'homePage'}
         super().__init__('https://www.wevity.com/')
 
-    def get_page_list(self, page):
-        request_url = '?c=find&s=1&gub=2&cidx=30&gp='+page
+    def get_page_list(self, page, mode):
+        request_url = '?c=find&s=1&mode='+mode+'&gub=2&cidx=30&gp='+page
         contest_div = self.get_soup(request_url).find('div', {'class':'ms-list'}).find_all('div', {'class':'tit'})
         contest_urls = []
         for div in contest_div:
@@ -25,7 +25,9 @@ class contestCrawler(crawler):
     def get_list(self):
         url_list = []
         for pageNo in range(6):
-            url_list.extend(self.get_page_list(str(pageNo+1)))
+            url_list.extend(self.get_page_list(str(pageNo+1), 'soon'))
+        for pageNo in range(6):
+            url_list.extend(self.get_page_list(str(pageNo+1), 'ing'))
         return url_list
 
     def get_json(self):
@@ -38,8 +40,10 @@ class contestCrawler(crawler):
             content_info['title'] = soup.find('div', {'class':'tit-area'}).h6.text
             content_info['imageUrl'] = self.BASE_URL + soup.find('div', {'class':'thumb'}).img['src']
             content = soup.find('div', {'id':'viewContents'}).text.strip(u'\r\t\n').replace(u'\t\n', u'\n')
+            raw_content = re.sub("\\<\\/?img.*?\\/?\\>", "", str(soup.find('div', {'id':'viewContents'})))
+            # print(raw_content)
             # content = soup.find('div', {'id':'viewContents'}).text
-            content_info['content'] = content
+            content_info['content'] = raw_content
             infos = soup.find('ul', {'class', 'cd-info-list'}).find_all('li')
             for info in infos:
                 raw = [r.strip('\r\n ') for r in info.text.strip('\n').split('\t')]
@@ -67,7 +71,7 @@ class contestCrawler(crawler):
                     else:
                         content_info[category] = content.strip()
             # print(content_info)
-            json_data.append(content_info)
+            json_data.insert(0, content_info)
         return json_data
 
 if __name__ == '__main__':

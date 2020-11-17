@@ -237,8 +237,8 @@ class CafeteriaInfo(db.Model):
     schoolID = db.Column(db.Integer, primary_key=True)
     regionID = db.Column(db.ForeignKey('region_info.regionID', ondelete='CASCADE'), index=True)
     version = db.Column(db.DateTime)
-    curCafeMenu = db.Column(db.String(7000, 'utf8_unicode_ci'))
-    nextCafeMenu = db.Column(db.String(7000, 'utf8_unicode_ci'))
+    curCafeMenu = db.Column(db.String(8000, 'utf8_unicode_ci'))
+    nextCafeMenu = db.Column(db.String(8000, 'utf8_unicode_ci'))
 
 class ContestInfo(db.Model):
     __tablename__ = 'contest_info'
@@ -282,6 +282,7 @@ class UserInfo(db.Model):
     nickName = db.Column(db.String(20, 'utf8_unicode_ci'), nullable=False)
     banned = db.Column(db.Integer)
     fcmToken = db.Column(db.String(200, 'utf8_unicode_ci'), nullable=False)
+    classNum = db.Column(db.Integer)
 
     school_info = db.relationship('SchoolInfo', primaryjoin='UserInfo.schoolID == SchoolInfo.schoolID', backref=backref('user_infos', cascade="all,delete"))
     region_info = db.relationship('RegionInfo', primaryjoin='UserInfo.regionID == RegionInfo.regionID', backref=backref('user_infos', cascade="all,delete"))
