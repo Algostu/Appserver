@@ -49,10 +49,10 @@ def get_read_reply():
 # def on_json_loading_failed_return_dict(e):
 #     return {}
 
+# @user_have_write_right
 @reply_api.route('/write', methods=['POST'])
 @login_required
 @allowed_access
-@user_have_write_right
 def post_write_reply():
     written_info = request.json
     if written_info is None:
@@ -98,10 +98,10 @@ def post_write_reply():
         send_push_alarm(fcm_token, title, json.dumps(body))
     return response_with_code('<success>')
 
+# @user_have_write_right
 @reply_api.route('/delete', methods=['GET'])
 @login_required
 @allowed_access
-@user_have_write_right
 def get_delete_reply():
     written_info = {key:int(val[0]) for key, val in dict(request.args).items()}
     print(written_info)

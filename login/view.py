@@ -117,7 +117,6 @@ def get_registerFCM():
     user.fcmToken = fcm_token
     session['fcm_token'] = fcm_token
     db.session.commit()
-    print(fcm_token)
     return response_with_code("<success>")
 
 @login_api.route('/kakaoSignup', methods=['POST'])
@@ -130,6 +129,7 @@ def post_signup():
     nickName, grade = escape(user_info['nickName']), escape(user_info['grade'])
     user_name = str(escape(user_info['userName']))
     classNum = user_info['classNum']
+    recommendCode = user_info['friend']
     # check sender access token is valid
     token_info = get_request(user_access_token, '/v1/user/access_token_info')
     if not token_info or str(user_id) != str(token_info['id']):
@@ -153,6 +153,12 @@ def post_signup():
     schoolInfo = SchoolInfo.query.filter_by(schoolID = user_info['schoolID']).first()
     if not schoolInfo:
         return response_with_code("<Fail>:2:school id is not good")
+    # check recommend friend
+    friend = ""
+    if recommendCode and recommendCode != "":
+        friend = UserInfo.query.filter_by(recommendCode = recommendCode).first()
+        if not friend:
+            return response_with_code('<Fail>:2:추천 코드가 유효하지 않습니다. 없을시에 그냥 진행해주세요.')
     sch_name = schoolInfo.schoolName
     reg_name = schoolInfo.regionName
     sch_gen = schoolInfo.gender
@@ -168,11 +174,15 @@ def post_signup():
     # store to user info to db
     gender = 1 if str(gender) == 'male' else 2
     age = 1 if str(ageRange) == "14~19" else 2
-    user = UserInfo(userID=int(user_id), schoolID=user_info['schoolID'], regionID=sch_reg,
+    user = UserInfo(userID=int(user_id), schoolID=user_info['schoolID'], regionID=sch_reg, recommendCode = get_random_alphanumeric_string(20),
     email=str(email), grade=int(grade), age=age, gender=gender, nickName=str(nickName), classNum=classNum,
     studentName=user_name,schoolName=sch_name,regionName=reg_name,authorized=0,signupDate=get_cur_date(),fcmToken="")
     db.session.add(user)
     db.session.commit()
+    if friend:
+        recommend = UserRecommend(recommendUserID=friend.userID, newUserID=int(user_id))
+        db.session.add(recommend)
+        db.session.commit()
     return response_with_code('<success>')
 
 def get_request(token, url):

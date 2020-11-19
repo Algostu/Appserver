@@ -18,12 +18,10 @@ class communityDB(baseDB):
         self.school_communityList = ['질문', '자유']
 
     def register_all_communityList(self):
+        db.session.query(CommunityAll).delete()
         for id in range(len(self.all_communityList)):
-            if CommunityAll.query.filter_by(communityID=id).first():
-                continue
-
             community_name = self.all_communityList[id]
-            community = CommunityAll(communityID=id, communityName=community_name)
+            community = CommunityAll(communityID=id+1, communityName=community_name)
             db.session.add(community)
         db.session.commit()
 

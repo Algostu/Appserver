@@ -15,10 +15,10 @@ allowed_ids = ['allowed_all_ids', 'allowed_region_ids', 'allowed_school_ids']
 
 time_format = "%04d/%02d/%02d %02d:%02d:%02d"
 
+# @user_have_write_right
 @article_api.route('/report', methods=['GET'])
 @login_required
 @allowed_access
-@user_have_write_right
 def get_report_article():
     communityType = int(request.args.get('communityType'))
     articleID = int(request.args.get('articleID'))
@@ -145,10 +145,10 @@ def get_modify_heart():
 # def on_json_loading_failed_return_dict(e):
 #     return {}
 
+# @user_have_write_right
 @article_api.route('/write', methods=['POST'])
 @login_required
 @allowed_access
-@user_have_write_right
 def post_write_article():
     written_info = request.json
     if written_info is None:
@@ -176,11 +176,10 @@ def post_write_article():
     db.session.commit()
     return response_with_code("<success>")
 
-
+# @user_have_write_right
 @article_api.route('/delete', methods=['GET'])
 @login_required
 @allowed_access
-@user_have_write_right
 def get_delete_article():
     communityType = int(request.args.get('communityType'))
     articleID = int(request.args.get('articleID'))

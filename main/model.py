@@ -217,6 +217,8 @@ class SchoolInfo(db.Model):
     gender = db.Column(db.Integer)
     contact = db.Column(db.String(20, 'utf8_unicode_ci'))
     homePage = db.Column(db.String(1000, 'utf8_unicode_ci'))
+    I_CODE = db.Column(db.String(50, 'utf8_unicode_ci'))
+    SC_CODE = db.Column(db.String(50, 'utf8_unicode_ci'))
 
     region_info = db.relationship('RegionInfo', primaryjoin='SchoolInfo.regionID == RegionInfo.regionID', backref=backref('school_infos', cascade="all,delete"))
 
@@ -262,7 +264,14 @@ class UserCredential(db.Model):
     userID = db.Column(db.Integer, primary_key=True)
     pwd = db.Column(db.String(20, 'utf8_unicode_ci'))
 
+class UserRecommend(db.Model):
+    __tablename__ = 'user_recommend'
+    recommendID = db.Column(db.Integer, primary_key=True)
+    newUserID = db.Column(db.ForeignKey('user_info.userID', ondelete='CASCADE'), index=True)
+    recommendUserID = db.Column(db.ForeignKey('user_info.userID', ondelete='CASCADE'), index=True)
 
+    user_id = db.relationship('UserInfo', primaryjoin='UserRecommend.newUserID == UserInfo.userID', backref=backref('user_recommends', cascade="all,delete"))
+    recommendUser_id = db.relationship('UserInfo', primaryjoin='UserRecommend.recommendUserID == UserInfo.userID', backref=backref('user_recommendss', cascade="all,delete"))
 
 class UserInfo(db.Model):
     __tablename__ = 'user_info'
@@ -283,6 +292,7 @@ class UserInfo(db.Model):
     banned = db.Column(db.Integer)
     fcmToken = db.Column(db.String(200, 'utf8_unicode_ci'), nullable=False)
     classNum = db.Column(db.Integer)
+    recommendCode = db.Column(db.String(25, 'utf8_unicode_ci'), nullable=False)
 
     school_info = db.relationship('SchoolInfo', primaryjoin='UserInfo.schoolID == SchoolInfo.schoolID', backref=backref('user_infos', cascade="all,delete"))
     region_info = db.relationship('RegionInfo', primaryjoin='UserInfo.regionID == RegionInfo.regionID', backref=backref('user_infos', cascade="all,delete"))

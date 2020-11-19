@@ -3,18 +3,43 @@ import json
 from tqdm import tqdm
 
 def combine_jsons():
-    file_name_base = "data/"
-    school_list = {}
-    for idx in range(17):
-        print("reading files " + file_name_base + str(idx) + '.json' + "....")
-        json_data = read_json(file_name_base + str(idx) + '.json')
-        for school in json_data:
-            I_CODE = school['ATPT_OFCDC_SC_CODE']
-            SC_CODE = school['SD_SCHUL_CODE']
-            SC_NAME = school['SCHUL_NM']
-            if len(I_CODE) != 0 and len(SC_CODE) != 0 and len(SC_NAME) != 0:
-                school_list[SC_NAME] = {'I_CODE':I_CODE, 'SC_CODE':SC_CODE}
-    save_json('data/school_code', school_list)
+        nickName_to_realName = {"서울":"서울특별시", "부산":"부산광역시", "대구":"대구광역시", "인천":"인천광역시", "광주":"광주광역시",
+        "대전":"대전광역시", "울산":"울산광역시", "세종":"세종특별자치시", "경기":"경기도", "강원":"강원도", "충북":"충청북도",
+        "충남":"충청남도", "전북":"전라북도", "전남":"전라남도", "경북":"경상북도", "경남":"경상남도", "제주":"제주특별자치도"}
+        realName_to_nickName = {val : key for key, val in nickName_to_realName.items()}
+        file_name_base = "data/"
+        school_list = {}
+        region_set = set()
+        for idx in range(17):
+            print("reading files " + file_name_base + str(idx) + '.json' + "....")
+            json_data = read_json(file_name_base + str(idx) + '.json')
+            for school in json_data:
+                I_CODE = school['ATPT_OFCDC_SC_CODE']
+                SC_CODE = school['SD_SCHUL_CODE']
+                SC_NAME = school['SCHUL_NM']
+                try:
+                    if SC_NAME == '서울국악예술고등학교':
+                        REGION = '서울'
+                        SUB_REGION = '강남구'
+                    else:
+                        SUB_REGION = school['ORG_RDNMA'].split(" ")[1]
+                        REGION = school['ORG_RDNMA'].split(" ")[0]
+                        if REGION in realName_to_nickName.keys():
+                            REGION = realName_to_nickName[school['ORG_RDNMA'].split(" ")[0]]
+                        region_set.add(REGION)
+                        if SUB_REGION == '':
+                            SUB_REGION = '세종시'
+                    if len(I_CODE) != 0 and len(SC_CODE) != 0:
+                        if REGION not in school_list:
+                            school_list[REGION] = {}
+                        if SUB_REGION not in school_list[REGION]:
+                            school_list[REGION][SUB_REGION] = {}
+                        school_list[REGION][SUB_REGION][SC_NAME] = {'I_CODE':I_CODE, 'SC_CODE':SC_CODE}
+                except IndexError:
+                    print(school['SCHUL_NM'])
+        print(region_set)
+        save_json('data/school_code', school_list)
+
 
 
 def convert_to_json():
