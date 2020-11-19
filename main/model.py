@@ -256,7 +256,7 @@ class ContestInfo(db.Model):
     prize = db.Column(db.String(100, 'utf8_unicode_ci'))
     firstPrize = db.Column(db.String(100, 'utf8_unicode_ci'))
     homePage = db.Column(db.String(100, 'utf8_unicode_ci'))
-
+    storedDate = db.Column(db.String(100, 'utf8_unicode_ci'))
 
 class UserCredential(db.Model):
     __tablename__ = 'user_credential'

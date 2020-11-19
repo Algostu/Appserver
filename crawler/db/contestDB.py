@@ -33,7 +33,7 @@ class contestDB(baseDB):
             db.session.rollback()
         for contest in tqdm(contest_infos):
             new_contest = ContestInfo(title=contest['title'],imageUrl=contest['imageUrl'],content=contest['content'],area=contest['area'],sponsor=contest['sponsor'],
-            start=contest['start'], end=contest['end'], prize=contest['prize'],firstPrize=contest['firstPrize'],homePage=contest['homePage'])
+            start=contest['start'], end=contest['end'], prize=contest['prize'],firstPrize=contest['firstPrize'],homePage=contest['homePage'],storedDate=self.version)
             db.session.add(new_contest)
             db.session.commit()
 
