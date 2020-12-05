@@ -23,12 +23,14 @@ class univDB(baseDB):
         }
 
     def register_UnivInfo(self):
-        univ_info = convert_to_json('crawler/data/대학교 목록.xlsx')
+        db.session.query(UnivInfo).delete()
+        univ_info = convert_to_json('crawler/data/대학교 목록.xlsx', 'crawler/data/dobie.xlsx')
         for univ in tqdm(univ_info):
-            unit = UnivInfo(univName=univ['name'], subRegion=univ['sub_region'], homePage=univ['homePage'])
-            eduPage = self.eduPage.pop(univ['name'], "")
-            unit.eduHomePage = eduPage
-            unit.logoPossible = 1 if eduPage != '' else 0
+            unit = UnivInfo(univName=univ['name'], subRegion=univ['sub_region'], homePage=univ['homePage'],
+            engname=univ['eng_name'], youtube=univ['youtube'], admission=univ['admission'])
+            # eduPage = self.eduPage.pop(univ['name'], "")
+            # unit.eduHomePage = eduPage
+            # unit.logoPossible = 1 if eduPage != '' else 0
             db.session.add(unit)
         db.session.commit()
 

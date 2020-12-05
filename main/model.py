@@ -231,6 +231,9 @@ class UnivInfo(db.Model):
     subRegion = db.Column(db.String(100, 'utf8_unicode_ci'))
     homePage = db.Column(db.String(1000, 'utf8_unicode_ci'))
     eduHomePage = db.Column(db.String(300, 'utf8_unicode_ci'))
+    admission = db.Column(db.String(500, 'utf8_unicode_ci'))
+    youtubue = db.Column(db.String(500, 'utf8_unicode_ci'))
+    engname = db.Column(db.String(150, 'utf8_unicode_ci'))
     logoPossible = db.Column(db.Integer)
 
 class CafeteriaInfo(db.Model):
