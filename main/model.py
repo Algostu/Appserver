@@ -232,9 +232,22 @@ class UnivInfo(db.Model):
     homePage = db.Column(db.String(1000, 'utf8_unicode_ci'))
     eduHomePage = db.Column(db.String(300, 'utf8_unicode_ci'))
     admission = db.Column(db.String(500, 'utf8_unicode_ci'))
-    youtubue = db.Column(db.String(500, 'utf8_unicode_ci'))
+    youtube = db.Column(db.String(500, 'utf8_unicode_ci'))
     engname = db.Column(db.String(150, 'utf8_unicode_ci'))
     logoPossible = db.Column(db.Integer)
+    viewNumber = db.Column(db.Integer)
+
+class MajorInfo(db.Model):
+    __tablename__ = 'major_info'
+
+    majorID = db.Column(db.Integer, primary_key=True)
+    majorSeq = db.Column(db.Integer)
+    mClass = db.Column(db.String(100, 'utf8_unicode_ci'))
+    gender = db.Column(db.String(20, 'utf8_unicode_ci'))
+    employment_rate = db.Column(db.String(15, 'utf8_unicode_ci'))
+    avg_salary = db.Column(db.String(15, 'utf8_unicode_ci'))
+    viewNumber = db.Column(db.Integer)
+
 
 class CafeteriaInfo(db.Model):
     __tablename__ = 'cafeteria_info'

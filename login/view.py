@@ -165,9 +165,9 @@ def post_signup():
     sch_reg = schoolInfo.regionID
     if (sch_gen == 1 and gender != 'male') or (sch_gen == 2 and gender != 'female'):
         return response_with_code("<Fail>:2:user gender is not same as school")
-    if str(ageRange) not in ['20~29', '14~19'] or str(ageRange) == '20~29' and int(grade) < 13:
-        print(str(ageRange))
-        return response_with_code("<Fail>:2:user age don't go school any more")
+    # if str(ageRange) not in ['20~29', '14~19'] or (str(ageRange) == '20~29' and int(grade) < 13):
+    #     print(str(ageRange))
+    #     return response_with_code("<Fail>:2:user age don't go school any more")
     # check if user has already registered
     if UserInfo.query.filter_by(userID = user_id).first():
         return response_with_code("<Fail>:2:alread registered")

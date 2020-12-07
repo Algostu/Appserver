@@ -71,8 +71,12 @@ def post_write_reply():
     # generate articleID
     reply_id = (written_info['communityID'] % 100) * 10000000 + get_random_numeric_value(2) * 100000 + current_milli_time()
     # create article instante
-    reply= reply_type[written_info['communityType']] if written_info['parentID'] == 0 \
-        else reReply_type[written_info['communityType']]
+    reply = reply_type[written_info['communityType']]
+    parent_reply = None
+    # differen for re reply
+    if written_info['parentID'] != 0:
+        parent_reply = reply
+        reply = reReply_type[written_info['communityType']]
     new_reply = reply(articleID = written_info['articleID'],
     communityID=written_info['communityID'],
     userID=session['user_id'],
@@ -90,6 +94,16 @@ def post_write_reply():
     db.session.add(new_reply)
     db.session.commit()
     # send push alarm
+    # rereply
+    if parent_reply:
+        parent_reply_writter_id = parent_reply.query.filter_by(replyID = written_info['parentID']).first().userID
+        fcm_token = UserInfo.query.filter_by(userID = parent_reply_writter_id).first().fcmToken
+        if fcm_token:
+            title = "새로운 대댓글이 달렸습니다."
+            body = {"communityType":written_info['communityType'], "articleID":written_info['articleID'], "communityID":written_info['communityID'],
+            "content":written_info['content'], "time":get_cur_date(), "type":0}
+            send_push_alarm(fcm_token, title, json.dumps(body))
+    # article
     fcm_token = UserInfo.query.filter_by(userID = writter_id).first().fcmToken
     if fcm_token:
         title = "새로운 댓글이 달렸습니다."
