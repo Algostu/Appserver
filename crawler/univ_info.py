@@ -38,8 +38,11 @@ def convert_to_json(path1, path2):
 
         if r[4].value in dobie:
             row_dict.update(dobie[r[4].value])
-        high_school_data.append(row_dict)
 
+        high_school_data.append(row_dict)
+    # print(high_school_data)
+    # print(dobie)
+    # print(i)
     # logo
     # base_path = './crawler/data/logo/'
     # file_list = os.listdir(base_path)

@@ -124,16 +124,25 @@ def send_push_alarm(to, title, body):
         'Content-Type' : 'application/json',
         'Authorization': 'key=AAAAfktu114:APA91bFKJ0O4YF28d_IgbGJRmf6iyjSMdYEheVu_zLfvlNKi-vHBSeKuSlqEP-8JnWGG1e0s17-Ask5wKoFMOZLA11jXaS8hJLuGPA-pSQt5d_ylmHJfv8YlKzQ8dsjq7kOAIpv2bpCz'
     }
+    # body = {
+    #     'to':to,
+    #     'priority':'high',
+    #     'data':{
+    #         'title':title,
+    #         'message':body
+    #     },
+    #     'notification':{
+    #         'title':title,
+    #         'body':body
+    #     }
+    # }
+
     body = {
         'to':to,
         'priority':'high',
         'data':{
             'title':title,
             'message':body
-        },
-        'notification':{
-            'title':title,
-            'body':body
         }
     }
     r= requests.post('https://fcm.googleapis.com/fcm/send', headers=headers, data=json.dumps(body))

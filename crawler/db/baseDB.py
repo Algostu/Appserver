@@ -1,7 +1,9 @@
 import json
+import requests
 
 class baseDB:
     def __init__(self):
+        self.base_url = ""
         self.regionInfo = {"서울특별시":1102, "부산광역시":1151, "대구광역시":1153, "인천광역시":1132, "광주광역시":1162,
         "대전광역시":1142, "울산광역시":1152, "세종특별자치시":1144, "경기도":1131, "강원도":1133, "충청북도":1143,
         "충청남도":1141, "전라북도":1163, "전라남도":1161, "경상북도":1154, "경상남도":1155, "제주특별자치도":1164}
@@ -22,3 +24,6 @@ class baseDB:
         with open(file_name, encoding = 'utf8') as json_file:
             json_data = json.load(json_file)
         return json_data
+
+    def get_json(self, url):
+        return requests.get(url).json()
