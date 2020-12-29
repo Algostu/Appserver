@@ -12,7 +12,7 @@ mypage_api = Blueprint('mypage', __name__, url_prefix='/mypage')
 @mypage_api.route('/surveyLink', methods=['GET'])
 @login_required
 def get_surveyLink():
-    return response_with_code("<success>", "https://www.naver.com")
+    return response_with_code("<success>", "https://docs.google.com/forms/d/e/1FAIpQLScWmnnrdef-7CFsVMRwxAIQJnv_RT_n9gczP-XOaLe1c0kNdA/viewform?usp=sf_link")
 
 @mypage_api.route('/myWork', methods=['GET'])
 @login_required

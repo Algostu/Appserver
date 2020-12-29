@@ -207,10 +207,10 @@ def get_article_list():
     article = com_type[communityType]
 
     if writtenAfter == 'latest':
-        rows = article.query.filter_by(communityID=communityID).order_by(desc(article.writtenTime)).limit(15).all()
+        rows = article.query.filter_by(communityID=communityID).order_by(desc(article.writtenTime)).limit(16).all()
     else:
         rows = article.query.filter(article.writtenTime<writtenAfter, article.communityID==communityID).\
-        order_by(desc(article.writtenTime)).limit(15).all()
+        order_by(desc(article.writtenTime)).limit(16).all()
     articles = []
     for row in rows:
         dict_row = convert_to_dict(row)

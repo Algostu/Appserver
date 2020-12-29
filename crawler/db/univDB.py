@@ -60,5 +60,5 @@ class univDB(baseDB):
                 print(major)
 
     def run(self):
-        self.register_major()
-        # self.register_UnivInfo()
+        # self.register_major()
+        self.register_UnivInfo()

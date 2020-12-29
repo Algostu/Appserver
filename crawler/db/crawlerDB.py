@@ -14,6 +14,7 @@ from cafeteriaDB import cafeDB
 from communityDB import communityDB
 from contestDB import contestDB
 from univDB import univDB
+from survey import surveyDB
 
 class dbAdapter(Command):
     option_list = (
@@ -36,3 +37,7 @@ class dbAdapter(Command):
         elif type=='univ' or type=='U':
             univ = univDB()
             univ.run()
+        elif type=="alarm" or type=="A":
+            survey = surveyDB()
+            survey.run()
+            
