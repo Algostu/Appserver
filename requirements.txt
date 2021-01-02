@@ -220,7 +220,7 @@ pyperplan == 1.3
 
 # C:\code\Appserver\test\article_test.py: 2
 # C:\code\Appserver\test\conftest.py: 2
-pytest == 0.0.0
+pytest
 
 # C:\code\Appserver\login\view.py: 8
 python_usernames == 0.3.1
