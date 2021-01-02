@@ -210,7 +210,7 @@ openpyxl == 2.0.5
 # C:\code\Appserver\mypage\view.py: 2
 # C:\code\Appserver\search\view.py: 2
 # C:\code\Appserver\univ\view.py: 2
-pandas == 1.1.3
+pandas 
 
 # C:\code\Appserver\login\view.py: 11
 pycryptodome == 3.9.9
