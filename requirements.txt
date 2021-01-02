@@ -123,25 +123,25 @@ alembic == 1.4.3
 ally-py == 0.9.0
 
 # C:\code\Appserver\main\view.py: 2
-article == 0.1.1
+# article == 0.1.1
 
 # C:\code\Appserver\crawler\baseCrawler.py: 3
 beautifulsoup4 == 4.9.3
 
 # C:\code\Appserver\main\view.py: 8
-cellnopt-admin == 0.2.3
+# cellnopt-admin == 0.2.3
 
 # C:\code\Appserver\main\view.py: 7
-contest == 2020.1.0
+# contest == 2020.1.0
 
 # C:\code\Appserver\manage.py: 9
-crawler == 0.0.2
+# crawler == 0.0.2
 
 # C:\code\Appserver\main\view.py: 8
 dash-spa == 0.0.2
 
 # C:\code\Appserver\main\view.py: 4
-django-multisearch == 1.1.6
+# django-multisearch == 1.1.6
 
 # C:\code\Appserver\login\view.py: 11
 # dlitztest == 2.6
@@ -196,7 +196,7 @@ gapiupdated == 1.0.1
 
 # C:\code\Appserver\crawler\school_info.py: 1
 # C:\code\Appserver\crawler\univ_info.py: 1
-openpyxl == 3.0.5
+openpyxl == 2.0.5
 
 # C:\code\Appserver\main\view.py: 4
 # opensource-job-portal == 0.1.0
