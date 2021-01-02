@@ -144,10 +144,10 @@ dash-spa == 0.0.2
 django-multisearch == 1.1.6
 
 # C:\code\Appserver\login\view.py: 11
-dlitztest == 2.6
+# dlitztest == 2.6
 
 # C:\code\Appserver\main\view.py: 4
-edx-search == 2.0.1
+# edx-search == 2.0.1
 
 # C:\code\Appserver\admin\view.py: 11
 # C:\code\Appserver\main\__init__.py: 9
