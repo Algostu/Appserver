@@ -44,7 +44,7 @@ Flask_Security == 3.0.0
 Flask_Session == 0.3.2
 
 # C:\code\Appserver\main\extensions.py: 25
-Pillow == 8.0.1
+Pillow == 7.0.0
 
 # C:\code\Appserver\admin\view.py: 7
 # C:\code\Appserver\article\view.py: 5
