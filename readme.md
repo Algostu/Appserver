@@ -59,9 +59,10 @@ You should download python 3.5 and other related program. Beacause I did not kno
 - redis
 - apache (for production)
 
-If you install all required program to your development environment, please download required python package. You can download required package in `requirements.txt`
+If you install all required program to your development environment, clone or download source code from github. After download source code, please download required python package. You can download required package in `requirements.txt`
 
 ```bash
+git clone https://github.com/Algostu/dodam-appserver.git
 pip install -r "requirements.txt"
 ```
 
