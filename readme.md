@@ -1,13 +1,42 @@
 # App Server Read Me
 
-[![Build Status](https://travis-ci.com/Algostu/Appserver.svg?token=G8pVCbCauf3DdVpT6k6s&branch=master)](https://travis-ci.com/Algostu/Appserver)
-[![codecov](https://codecov.io/gh/Algostu/Appserver/branch/master/graph/badge.svg?token=Q60ZB3RKIR)](https://codecov.io/gh/Algostu/Appserver/)
+<p align="center">
+<img width="200" alt="logo" src="https://github.com/Algostu/dodam-appserver/blob/master/log/logo.png?raw=true">
+</p>
+<h4 align="center">mobile online community application server</h4>
+</p>
+<p align="center">
+	<a href="https://travis-ci.com/Algostu/Appserver">
+		<img src="https://travis-ci.com/Algostu/Appserver.svg?token=G8pVCbCauf3DdVpT6k6s&branch=master"/>
+	</a>
+	<a href="https://codecov.io/gh/Algostu/Appserver">
+		<img src="https://codecov.io/gh/Algostu/Appserver/branch/master/graph/badge.svg?token=Q60ZB3RKIR"/>
+	</a>
+	<a href="https://play.google.com/store/apps/details?id=com.dum.dodam">
+	    	<img src="https://img.shields.io/badge/download-57-1EAEDB"
+		 alt="download">
+	</a>
+	<a href="https://play.google.com/store/apps/details?id=com.dum.dodam">
+	  	<img src="https://img.shields.io/badge/user-40-ff69b4"
+		 alt="user">
+	</a>
+</p>
 
-This is dodam-dodam application's app server repository. Application's app repo is [here](https://github.com/Algostu/dodam-android)  
+<p align="center">
+  <a href="#service-history-analysis">service history</a> • 
+  <a href="#service-history-analysis">service architecture</a> • 
+  <a href="#tutorial">tutorial</a> •  
+  <a href="#options">option</a> •   
+  <a href="#file-structure">File Structure</a> • 
+  <a href="#related">Related</a> • 
+  <a href="#license">License</a>
+</p>
+
+<p align="center">
+This is dodam-dodam application's app server repository. Application's app repo is <a href="https://github.com/Algostu/dodam-android">here</a>
 Dodam-dodam is mobile onlie communication application for highschool student. We develop this app during 2020 fall semester ajou univ's captsone design class.(X283)
 This application is actually serviced to customer for about 2 months and about 80 customer installed and use our app. When we close our app down, the number of member of system is about 50. 
-
-<img width="200" alt="logo" src="https://github.com/Algostu/dodam-appserver/blob/master/log/logo.png?raw=true">
+</p>
 
 ## Service History Analysis
 
@@ -118,4 +147,15 @@ elif type=="alarm" or type=="A": # send user notification
 5. `docs` 
 
    Documents made for myself to reference in the future.
+
+## Related
+
+* [dodam-android](https://github.com/Algostu/dodam-android) : 도담도담 android
+
+* [도담도담](https://play.google.com/store/apps/details?id=com.dum.dodam) : 도담도담 play store
+* [d.___.dam](https://www.instagram.com/d.___.dam/) : 도담도담 인스타그램
+
+## License
+
+This application is freely available for free non-commercial use, and may be redistributed under these conditions. Please, see the [license](LICENSE) for further details.
 
