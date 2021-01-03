@@ -68,6 +68,20 @@ elif type=="alarm" or type=="A": # send user notification
 
 
 
+## Service History Analysis
+
+We upload our app to play store and some kind customer come and use our app. Now we want to analysis how our service work during short service time. Our service start at 12th October and end at 30th December. The number of total customer of our system is 48 and About 80 people install our app via playstore. Now our app is not available to download on play store. Overview of our user download history is below graph. You can check more detail analysis here
+
+
+
+## Service Architecture 
+
+Main Architecture of dodam service is client-server. And issues we conflict during development are recorded here.
+
+
+
+
+
 ## File Structure  
 
 1. `main/`
