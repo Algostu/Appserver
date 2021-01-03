@@ -1,4 +1,9 @@
-[Send Request]
+# FCM Read Me
+
+google firebase cloud messaging service 
+
+[Send Request example]
+``` json
 url :  https://fcm.googleapis.com/fcm/send
 method : post
 header : {
@@ -18,8 +23,10 @@ body : {
       "body":"great match!"
     }
 }
+```
 
-[Return Result]
+[Return Result example]
+```json
 {
 "multicast_id":6959721758744553407,
 "success":1,
@@ -32,3 +39,4 @@ body : {
 server token : AAAAfktu114:APA91bFKJ0O4YF28d_IgbGJRmf6iyjSMdYEheVu_zLfvlNKi-vHBSeKuSlqEP-8JnWGG1e0s17-Ask5wKoFMOZLA11jXaS8hJLuGPA-pSQt5d_ylmHJfv8YlKzQ8dsjq7kOAIpv2bpCz
 
 device token : cbjVdBd6QUiAB-8abvn7jH:APA91bGLzbrwmIiIVTBsxQmzsruQ-WLvOVgCH-XrUM2n9hME6p0xe92XVqlia0EzEnTWPCzncLZZ0J7UfCGvXtd-rWEYovJiGPK6MQxtYMuLqQjlx5itgzdzn07jhB0K2KUl6wDFC8mb
+```
