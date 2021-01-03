@@ -1,11 +1,11 @@
 # Test Read Me
 
-This references
+**These are references**  
 1. [flask Test tutorial](https://flask.palletsprojects.com/en/1.1.x/testing/#testing)
 2. [pytest Parametrize tutorial](https://docs.pytest.org/en/stable/example/parametrize.html)
 3. [pytest collection convention](https://docs.pytest.org/en/latest/goodpractices.html#conventions-for-python-test-discovery)
 
-**The First Test Examples**
+**The First Test Examples**  
 Now it’s time to start testing the functionality of the application. Let’s check that the application shows “No entries here so far” if we access the root of the application (/). To do this, we add a new test function to test_flaskr.py, like this:
 
 ```python
