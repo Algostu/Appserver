@@ -3,7 +3,23 @@
 [![Build Status](https://travis-ci.com/Algostu/Appserver.svg?token=G8pVCbCauf3DdVpT6k6s&branch=master)](https://travis-ci.com/Algostu/Appserver)
 [![codecov](https://codecov.io/gh/Algostu/Appserver/branch/master/graph/badge.svg?token=Q60ZB3RKIR)](https://codecov.io/gh/Algostu/Appserver/)
 
+This is dodam-dodam application's app server repository. Application's app repo is [here](https://github.com/Algostu/dodam-android)  
+Dodam-dodam is mobile onlie communication application for highschool student. We develop this app during 2020 fall semester ajou univ's captsone design class.(X283)
+This application is actually serviced to customer for about 2 months and about 80 customer installed and use our app. When we close our app down, the number of member of system is about 50. 
 
+<img width="200" alt="logo" src="https://github.com/Algostu/dodam-appserver/blob/master/log/logo.png?raw=true">
+
+## Service History Analysis
+
+We upload our app to play store and some kind customer come and use our app. Now we want to analysis how our service work during short service time. Our service start at 12th October and end at 30th December. The number of total customer of our system is 48 and About 80 people install our app via playstore. Now our app is not available to download on play store. Overview of our user download history is below graph. You can check more detail analysis [here](https://github.com/Algostu/dodam-appserver/blob/master/docs/log_analysis.md)
+
+![history](https://raw.githubusercontent.com/Algostu/dodam-appserver/master/log/history.png)
+
+## Service Architecture 
+
+Main Architecture of dodam service is client-server. And issues we conflict during development are recorded [here](https://github.com/Algostu/dodam-appserver/blob/master/docs/service_issues.md).
+
+![architecture](https://github.com/Algostu/dodam-appserver/blob/master/log/service%20architecture.png)
 
 ## Tutorial 
 
@@ -25,8 +41,6 @@ You can start server by simple command
 ```bash
 python manage.py runserver 
 ```
-
-
 
 ## Options
 
@@ -65,23 +79,6 @@ elif type=="alarm" or type=="A": # send user notification
 	survey = surveyDB()
 	survey.run()
 ```
-
-
-
-## Service History Analysis
-
-We upload our app to play store and some kind customer come and use our app. Now we want to analysis how our service work during short service time. Our service start at 12th October and end at 30th December. The number of total customer of our system is 48 and About 80 people install our app via playstore. Now our app is not available to download on play store. Overview of our user download history is below graph. You can check more detail analysis here
-
-![history](https://raw.githubusercontent.com/Algostu/dodam-appserver/master/log/history.png)
-
-
-## Service Architecture 
-
-Main Architecture of dodam service is client-server. And issues we conflict during development are recorded here.
-
-![architecture](https://github.com/Algostu/dodam-appserver/blob/master/log/service%20architecture.png)
-
-
 
 ## File Structure  
 
